@@ -1,4 +1,4 @@
 [submodule "cmdstan"]
 	path = cmdstan
 	url = https://github.com/bstatcomp/cmdstan.git
-	branch = develop
+	branch = pharma-model
