@@ -23,15 +23,18 @@ sample_from_exe <- function (data_list,
                              seed            = 1607674300,
                              ...) {
   # create temporary file names for data and init
-  data_file <- paste0("./data/TEMP/data",
+  data_file <- paste0(tempdir(),
+                      "\\data",
                       paste(c(sample(c("a","b","c","d", 1:9), 4, TRUE)), 
                             collapse = ""),
                       ".R")
-  init_file <- paste0("./data/TEMP/init",
+  init_file <- paste0(tempdir(),
+                      "\\init",
                       paste(c(sample(c("a","b","c","d", 1:9), 4, TRUE)), 
                             collapse = ""),
                       ".R")
-  out_file  = paste0("./data/TEMP/out",
+  out_file  = paste0(tempdir(),
+                     "\\out",
                      paste(c(sample(c("a","b","c","d", 1:9), 4, TRUE)), 
                            collapse = ""),
                      ".csv")
@@ -64,8 +67,32 @@ sample_from_exe <- function (data_list,
   close(fileConn)
   
   
-  # run model
-  mod <- "./bin/generalized_logistic_model/Win64/generalized_logistic_model.exe"
+
+  # here we have to check for OS and select the correct version into mod
+  get_os <- function() {
+    if (.Platform$OS.type == "windows") { 
+      "win"
+    } else if (Sys.info()["sysname"] == "Darwin") {
+      "mac" 
+    } else if (.Platform$OS.type == "unix") { 
+      "unix"
+    } else {
+      stop("Unknown OS")
+    }
+  }
+  my_os <- get_os()
+  if (my_os == "win") {
+    mod <- "./bin/generalized_logistic_model/Win64/generalized_logistic_model.exe"
+  }
+  if (my_os == "unix") {
+    # TODO
+  }
+  if (my_os == "mac") {
+    # link to page
+  }
+  
+  
+  # create string
   model_call <- paste0(mod,
                        " sample",
                        " num_samples=", num_samples,
@@ -94,13 +121,29 @@ sample_from_exe <- function (data_list,
                        " random",
                        " seed=", seed,
                        " output file=", out_file)
-  system(model_call)
   
-  
+  # here comes try-catch + delete temporary files in case of error
+  tryCatch({
+    system(model_call)
+  }, warning = function(w){
+    print(w)
+  }, error   = function(e) {
+    file.remove(data_file, init_file, out_file) # without out_file?
+    stop(e)
+  })
+
   # read saved csv and return the values + delete temporary files
-  stan_out <- read.delim(out_file, 
-                         sep          = ",", 
-                         comment.char = "#")
+  tryCatch({
+    stan_out <- read.delim(out_file, 
+                           sep          = ",", 
+                           comment.char = "#")
+  }, warning = function(w){
+    print(w)
+  }, error   = function(e) {
+    file.remove(data_file, init_file, out_file)
+    stop(paste(e, "No output from the model. Check model call."))
+  })
+  
   file.remove(data_file, init_file, out_file)
   return(stan_out)
 }
