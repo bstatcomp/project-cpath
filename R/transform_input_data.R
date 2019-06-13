@@ -7,7 +7,6 @@ library(loo)
 source("./data/generalized_logistic_model/data.R")
 source("./R/list_to_df.R")
 
-
 in_data <- nlist(N,
                  P,
                  M,
@@ -19,12 +18,5 @@ in_data <- nlist(N,
                  APOE4,
                  time,
                  S)
-
 df <- list_to_df(in_data)
-head(df)
-
-
-# my_list <- df_to_list(df, c("AGE", "SEX", "COMED", "APOE4"))
-my_list <- df_to_list(df, ~ AGE + SEX + COMED + APOE4)
-names(my_list)
-my_list
+saveRDS(df, file = "./data/generalized_logistic_model/data_df.rds")

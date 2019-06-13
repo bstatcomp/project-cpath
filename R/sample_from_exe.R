@@ -1,5 +1,6 @@
-sample_from_exe <- function (data_list,
-                             init_list,
+sample_from_exe <- function (df,
+                             covariates,
+                             init_list       = NULL,
                              num_samples     = 1000,
                              num_warmup      = 1000,
                              save_warmup     = 0,
@@ -50,6 +51,7 @@ sample_from_exe <- function (data_list,
     return (char_vec)
   }
   # data
+  data_list <- df_to_list(df, covariates)
   char_data <- sapply(data_list, my_fun)
   char_data <- paste0(names(char_data), char_data)
   char_data <- gsub('(.{1,90})(\\s|$)', '\\1\n', char_data)
@@ -116,8 +118,12 @@ sample_from_exe <- function (data_list,
                        " stepsize=", stepsize,
                        " stepsize_jitter=", stepsize_jitter,
                        " data",
-                       " file=", data_file,
-                       " init=", init_file,
+                       " file=", data_file)
+  if (!is.null(init_file)) {
+    model_call <- paste0(model_call, 
+                         " init=", init_file)
+  }
+  model_call <- paste0(model_call,
                        " random",
                        " seed=", seed,
                        " output file=", out_file)

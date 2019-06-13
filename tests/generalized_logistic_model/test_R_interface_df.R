@@ -4,22 +4,11 @@ my_path <- strsplit(my_path, split = "/")[[1]]
 my_path <- paste0(my_path[-c(length(my_path) - 1, length(my_path))], collapse = "/")
 setwd(my_path)
 library(loo)
-source("./data/generalized_logistic_model/data.R")
 source("./data/generalized_logistic_model/init.R")
 source("./R/sample_from_exe.R")
 
 # data input -------------------------------------------------------------------
-in_data <- nlist(N,
-                 P,
-                 M,
-                 IDp,
-                 IDs,
-                 AGE,
-                 SEX,
-                 COMED,
-                 APOE4,
-                 time,
-                 S)
+in_data <- readRDS("./data/generalized_logistic_model/data_df.rds")
 in_init <- nlist(theta_S0,
                  theta_r,
                  theta_SEX,
@@ -42,25 +31,24 @@ in_init <- nlist(theta_S0,
                  beta_bateman)
 
 # run sampling -----------------------------------------------------------------
-b <- sample_from_exe(data_list   = in_data, 
+b <- sample_from_exe(df          = in_data, 
+                     covariates  = ~ SEX + AGE + APOE4 + COMED,
                      init_list   = in_init, 
                      num_samples = 10,
                      num_warmup  = 10)
 
-# bad data ---------------------------------------------------------------------
-source("./data/generalized_logistic_model/data_bad.R")
-in_data <- nlist(N,
-                 P,
-                 M,
-                 IDp,
-                 IDs,
-                 AGE,
-                 SEX,
-                 COMED,
-                 APOE4,
-                 time,
-                 S)
-b <- sample_from_exe(data_list   = in_data, 
-                     init_list   = in_init, 
+# Not all initialization values
+tmp_init      <- in_init
+tmp_init[[1]] <- NULL
+b <- sample_from_exe(df          = in_data, 
+                     covariates  = ~ SEX + AGE + APOE4 + COMED,
+                     init_list   = tmp_init, 
+                     num_samples = 10,
+                     num_warmup  = 10)
+
+tmp_init      <- in_init
+tmp_init[[1]] <- NULL
+b <- sample_from_exe(df          = in_data, 
+                     covariates  = ~ SEX + AGE + APOE4 + COMED,
                      num_samples = 10,
                      num_warmup  = 10)
