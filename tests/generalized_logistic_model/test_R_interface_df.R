@@ -31,24 +31,32 @@ in_init <- nlist(theta_S0,
                  beta_bateman)
 
 # run sampling -----------------------------------------------------------------
-b <- sample_from_exe(df          = in_data, 
-                     covariates  = ~ SEX + AGE + APOE4 + COMED,
-                     init_list   = in_init, 
-                     num_samples = 10,
-                     num_warmup  = 10)
+b <- sample_from_exe(df             = in_data, 
+                     SubjectIdVar   = IDp,
+                     StudyIdVar     = IDs,
+                     TimeVar        = time,
+                     ScoreVar       = S,
+                     SecondScoreVar = NULL,
+                     CovariatesX    = ~ AGE + SEX,
+                     CovariatesY    = ~ COMED,
+                     CovariatesZ    = NULL,
+                     covariates     = ~ SEX + AGE + APOE4 + COMED,
+                     init_list      = in_init, 
+                     num_samples    = 10,
+                     num_warmup     = 10)
 
-# Not all initialization values
-tmp_init      <- in_init
-tmp_init[[1]] <- NULL
-b <- sample_from_exe(df          = in_data, 
-                     covariates  = ~ SEX + AGE + APOE4 + COMED,
-                     init_list   = tmp_init, 
-                     num_samples = 10,
-                     num_warmup  = 10)
-
-tmp_init      <- in_init
-tmp_init[[1]] <- NULL
-b <- sample_from_exe(df          = in_data, 
-                     covariates  = ~ SEX + AGE + APOE4 + COMED,
-                     num_samples = 10,
-                     num_warmup  = 10)
+# # Not all initialization values
+# tmp_init      <- in_init
+# tmp_init[[1]] <- NULL
+# b <- sample_from_exe(df          = in_data, 
+#                      covariates  = ~ SEX + AGE + APOE4 + COMED,
+#                      init_list   = tmp_init, 
+#                      num_samples = 10,
+#                      num_warmup  = 10)
+# 
+# tmp_init      <- in_init
+# tmp_init[[1]] <- NULL
+# b <- sample_from_exe(df          = in_data, 
+#                      covariates  = ~ SEX + AGE + APOE4 + COMED,
+#                      num_samples = 10,
+#                      num_warmup  = 10)

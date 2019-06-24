@@ -9,117 +9,55 @@
 #'
 #' @examples
 df_to_list <- function (df,
-                        CovariatesX    = NULL,
-                        CovariatesY    = NULL,
-                        CovariatesZ    = NULL,
-                        SubjectIdVar   = NULL,
-                        StudyIdVar     = NULL,
-                        TimeVar        = NULL,
-                        ScoreVar       = NULL,
-                        SecondScoreVar = NULL,
+                        IDp            = NULL,
+                        IDs            = NULL,
+                        times          = NULL,
+                        S              = NULL,
+                        S2             = NULL,
+                        covx_nms       = NULL,
+                        covy_nms       = NULL,
+                        covz_nms       = NULL,
                         covariates) {
-  # assign names
-  IDp   <- deparse(substitute(SubjectIdVar))
-  IDs   <- deparse(substitute(StudyIdVar))
-  times <- deparse(substitute(TimeVar))
-  S     <- deparse(substitute(ScoreVar))
-  if (IDp == "NULL") {
-    IDp <- "SubjectId"
-  } 
-  if (IDs == "NULL") {
-    IDs <- "StudyId"
-  } 
-  if (times == "NULL") {
-    times <- "Time"
-  } 
-  if (S == "NULL") {
-    S <- "Score"
-  } 
-  
-  # check if in data frame
-  cnames <- colnames(df)
-  if (!(IDp %in% cnames)) {
-    stop(paste0("No column with name ", IDp, " in the data frame."))
+  # transform to long
+  scores_vec <- c(S, S2)
+  df_long    <- gather(df, ScoreId, Score, scores_vec)
+  df_long$ScoreId[df_long$ScoreId == scores_vec[1]] <- 1
+  if (length(scores_vec == 2)) {
+    df_long$ScoreId[df_long$ScoreId == scores_vec[2]] <- 2
   }
-  if (!(IDs %in% cnames)) {
-    stop(paste0("No column with name ", IDs, " in the data frame."))
-  }
-  if (!(times %in% cnames)) {
-    stop(paste0("No column with name ", times, " in the data frame."))
-  }
-  if (!(S %in% cnames)) {
-    stop(paste0("No column with name ", S, " in the data frame."))
-  }
-  
-  # check second score
-  S2 <- deparse(substitute(SecondScoreVar))
-  if (S2 != "NULL") {
-    if (S2 == S) {
-      stop("Second score has the same name as the first score.")
-    }
-    if (!(S2 %in% cnames)) {
-      stop(paste0("No column with name ", S2, " in the data frame."))
-    }
-  }
-  
-  # covariates
-  covx_nms <- all.vars(CovariatesX)
-  covy_nms <- all.vars(CovariatesY)
-  covz_nms <- all.vars(CovariatesZ)
-  if (length(intersect(covx_nms, covy_nms)) > 0) {
-    stop("Non-empty intersection between covariates X and Y.")
-  }
-  if (length(intersect(covx_nms, covz_nms)) > 0) {
-    stop("Non-empty intersection between covariates X and Z.")
-  }
-  if (length(intersect(covy_nms, covz_nms)) > 0) {
-    stop("Non-empty intersection between covariates Y and Z.")
-  }
-  other_names <- c(IDp, IDs, times, S)
-  if (S2 != "NULL") {
-    other_names <- c(other_names, S2)
-  }
-  if (length(intersect(covx_nms, other_names)) > 0) {
-    stop("Non-empty intersection between covariates X and core attributes.")
-  }
-  if (length(intersect(covy_nms, other_names)) > 0) {
-    stop("Non-empty intersection between covariates Y and core attributes.")
-  }
-  if (length(intersect(covz_nms, other_names)) > 0) {
-    stop("Non-empty intersection between covariates Z and core attributes.")
-  }
-  
-  
-  # transform to long format!!!
-  # TODO
-  
-  # other
+
+
+  # create list
   cov_nms <- all.vars(covariates)
   print(cov_nms)
-  N       <- nrow(df)
-  P       <- length(unique(df[ ,IDp]))
-  M       <- length(unique(df[ ,IDs]))
-  IDp     <- df[ ,IDp]
-  IDs     <- df[ ,IDs]
+  N           <- nrow(df) # Or nrow(df2)? Or something else?
+  P           <- length(unique(df_long[ ,IDp]))
+  M           <- length(unique(df_long[ ,IDs]))
+  IDp         <- df_long[ ,IDp]
+  IDs         <- df_long[ ,IDs]
+  times       <- df_long[ ,times]
+  SId         <- df_long[ ,"ScoreId"]
+  S           <- df_long[ ,"Score"]
+  CovariatesX <- as.matrix(df_long[ ,covx_nms])
+  CovariatesY <- as.matrix(df_long[ ,covy_nms])
+  CovariatesZ <- as.matrix(df_long[ ,covz_nms])
   
+  # old version, delete after new model
   tmp_list <- nlist()
   for (i in 1:length(cov_nms)) {
-    # tmp <- covariates[i]
-    # assign(tmp, df[ ,tmp])
     tmp           <- cov_nms[i]
     tmp_list[[i]] <- df[ ,tmp]
   }
   names(tmp_list) <- cov_nms
-  times <- df[ ,times]
-  S     <- df[ ,S]
   
   
+  out_list <- nlist(N, P, M, IDp, IDs, 
+                    CovariatesX, CovariatesY, CovariatesZ,
+                    times, SId, S)
   
-  
-  
-  out_list <- c(nlist(N, P, M, IDp, IDs), 
-                tmp_list,
-                nlist(times, S))
+  # old version, delete after new model
+  out_list_old <- c(nlist(N, P, M, IDp, IDs), 
+                    tmp_list,
+                    nlist(times, S))
   return(out_list)
-  
 }

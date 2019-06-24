@@ -29,20 +29,20 @@ head(df)
 
 # ok
 my_list <- df_to_list(df,
-                      SubjectIdVar   = IDp,
-                      StudyIdVar     = IDs,
-                      TimeVar        = time,
-                      ScoreVar       = S,
+                      IDp     = "IDp",
+                      IDs     = "IDs",
+                      times   = "time",
+                      S       = "S",
                       covariates = ~ AGE + SEX + COMED + APOE4)
 names(my_list)
 my_list
 
 # one name not in df
 my_list <- df_to_list(df,
-                      SubjectIdVar   = IDa,
-                      StudyIdVar     = IDs,
-                      TimeVar        = time,
-                      ScoreVar       = S,
+                      IDp     = "IDa",
+                      IDs     = "IDs",
+                      times   = "time",
+                      S       = "S",
                       covariates = ~ AGE + SEX + COMED + APOE4)
 
 # missing one name
@@ -89,4 +89,45 @@ my_list <- df_to_list(df,
                       TimeVar        = time,
                       ScoreVar       = S,
                       CovariatesX    = ~ AGE + SEX + IDp,
+                      covariates = ~ AGE + SEX + COMED + APOE4)
+
+
+# second score -----------------------------------------------------------------
+df2 <- cbind(df, SecondScoreVar = df$S)
+my_list <- df_to_list(df2,
+                      SubjectIdVar   = IDp,
+                      StudyIdVar     = IDs,
+                      TimeVar        = time,
+                      ScoreVar       = S,
+                      CovariatesX    = ~ AGE + SEX,
+                      SecondScoreVar = SecondScoreVar,
+                      covariates = ~ AGE + SEX + COMED + APOE4)
+
+my_list <- df_to_list(df2,
+                      SubjectIdVar   = IDp,
+                      StudyIdVar     = IDs,
+                      TimeVar        = time,
+                      ScoreVar       = S,
+                      CovariatesX    = ~ AGE + SEX,
+                      covariates = ~ AGE + SEX + COMED + APOE4)
+
+my_list <- df_to_list(df2,
+                      SubjectIdVar   = IDp,
+                      StudyIdVar     = IDs,
+                      TimeVar        = time,
+                      ScoreVar       = S,
+                      CovariatesX    = ~ AGE + SEX,
+                      SecondScoreVar = S,
+                      covariates = ~ AGE + SEX + COMED + APOE4)
+
+
+# new list ---------------------------------------------------------------------
+my_list <- df_to_list(df2,
+                      SubjectIdVar   = IDp,
+                      StudyIdVar     = IDs,
+                      TimeVar        = time,
+                      ScoreVar       = S,
+                      CovariatesX    = ~ AGE + SEX,
+                      CovariatesY    = ~ COMED,
+                      SecondScoreVar = SecondScoreVar,
                       covariates = ~ AGE + SEX + COMED + APOE4)
