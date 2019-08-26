@@ -1,4 +1,4 @@
-sample_from_exe_new <- function (df,
+data_for_Stan <- function (df,
                                  SubjectIdVar    = IDp,
                                  StudyIdVar      = IDs,
                                  TimeVar         = time,
@@ -38,14 +38,15 @@ sample_from_exe_new <- function (df,
                                  id              = 0,
                                  seed            = 1607674300,
                                  ...) {
-
+  
   # assign names
   IDp        <- deparse(substitute(SubjectIdVar))
   IDs        <- deparse(substitute(StudyIdVar))
   times      <- deparse(substitute(TimeVar))
   score      <- deparse(substitute(ScoreVar))
   is_pbo     <- deparse(substitute(is_pbo))
-
+  
+  
   # check if in data frame
   cnames <- colnames(df)
   if (!(IDp %in% cnames)) {
@@ -63,14 +64,14 @@ sample_from_exe_new <- function (df,
   if (!(is_pbo %in% cnames)) {
     stop(paste0("No column with name ", is_pbo, " in the data frame."))
   }
-
+  
   # covariates
   covr_nms    <- all.vars(CovariatesR)
   covb_nms    <- all.vars(CovariatesB)
   other_names <- c(IDp, IDs, times, score, is_pbo)
-
+  
   score2 <- deparse(substitute(ScoreVar2))
-
+  # if second score
   if (score2 != "NULL") {
     if (!(score2 %in% cnames)) {
       stop(paste0("No column with name ", score2, " in the data frame."))
@@ -132,7 +133,9 @@ sample_from_exe_new <- function (df,
     
     return (char_vec)
   }
-
+  
+  # browser()
+  # browser()
   
   if(score2 == "NULL") {
     data_list <- df_to_list(df, 
@@ -165,17 +168,43 @@ sample_from_exe_new <- function (df,
   }
   maps      <- data_list$maps
   data_list <- data_list$data
-
+  
   #data
+  char_data <- sapply(data_list, my_fun)
+  char_data <- paste0(names(char_data), char_data)
+  char_data <- gsub('(.{1,90})(\\s|$)', '\\1\n', char_data)
+  fileConn  <- file(data_file)
+  writeLines(char_data,
+             fileConn)
+  close(fileConn)
+  
+  
+  
+  
+  
+  # browser()
+  # TRYING R DUMP
   with(data_list, {
     stan_rdump(names(data_list), file = data_file)
   })
-
+  
+  
+  
+  
+  
+  
+  
+  
   # init
-  with(init_list, {
-    stan_rdump(names(init_list), file = init_file)
-  })
-
+  char_init <- sapply(init_list, my_fun)
+  char_init <- paste0(names(char_init), char_init)
+  char_init <- gsub('(.{1,90})(\\s|$)', '\\1\n', char_init)
+  fileConn  <- file(init_file)
+  writeLines(char_init,
+             fileConn)
+  close(fileConn)
+  
+  
   
   # here we have to check for OS and select the correct version into mod
   get_os <- function() {
@@ -194,7 +223,7 @@ sample_from_exe_new <- function (df,
     mod <- "./bin/generalized_logistic_model/Win64/new_model.exe"
     
     # CHANGE WINDOWS MODEL HERE
-
+    
     write(gpu_enabled, file = "./bin/generalized_logistic_model/Win64/gpu_enabled.txt")
   }
   if (my_os == "unix") {
@@ -208,7 +237,7 @@ sample_from_exe_new <- function (df,
     stop("macOS not supported.")
     # + link to page?
   }
-
+  
   
   
   
@@ -237,39 +266,48 @@ sample_from_exe_new <- function (df,
                        " stepsize_jitter=", stepsize_jitter,
                        " data",
                        " file=", data_file)
-  if (!is.null(init_list)) {
+  if (!is.null(init_file)) {
     model_call <- paste0(model_call,
                          " init=", init_file)
   }
-
+  
   model_call <- paste0(model_call,
                        " random",
                        " seed=", seed,
                        " output file=", out_file)
-
-  # run model + delete temporary files in case of error
-  tryCatch({
-    system(model_call)
-  }, warning = function(w){
-    print(w)
-  }, error   = function(e) {
-    file.remove(data_file, init_file, out_file)
-    stop(e)
-  })
-
-
-  # read saved csv and return the values + delete temporary files
-  tryCatch({
-    stan_out <- read.delim(out_file,
-                           sep          = ",",
-                           comment.char = "#")
-  }, warning = function(w){
-    print(w)
-  }, error   = function(e) {
-    file.remove(data_file, init_file, out_file)
-    stop(paste(e, "No output from the model. Check model call."))
-  })
-
-  return(list("stan_model" = stan_out, 
-              "maps"       = maps))
+  # return(data_list)
+  
+  
+  # browser()
+  
+  # # run model + delete temporary files in case of error
+  # tryCatch({
+  #   system(model_call)
+  # }, warning = function(w){
+  #   print(w)
+  # }, error   = function(e) {
+  #   file.remove(data_file, init_file, out_file)
+  #   stop(e)
+  # })
+  # 
+  # 
+  # # read saved csv and return the values + delete temporary files
+  # tryCatch({
+  #   stan_out <- read.delim(out_file,
+  #                          sep          = ",",
+  #                          comment.char = "#")
+  # }, warning = function(w){
+  #   print(w)
+  # }, error   = function(e) {
+  #   file.remove(data_file, init_file, out_file)
+  #   stop(paste(e, "No output from the model. Check model call."))
+  # })
+  
+  # browser()
+  #
+  # file.remove(data_file, init_file, out_file)
+  # return(stan_out)
+  return(list("data_list"  = data_list,
+              # "stan_model" = stan_out, 
+              "maps"       = maps)) # temporary
 }

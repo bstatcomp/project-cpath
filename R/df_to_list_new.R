@@ -5,7 +5,7 @@
 #' @param df Input data frame.
 #' @param covariates Vector of covariate names.
 #'
-#' @return A list suitable for transformation to csv.
+#' @return A list suitable as Stan input.
 #'
 #' @examples
 df_to_list <- function (df, 
@@ -25,14 +25,6 @@ df_to_list <- function (df,
                         m_b2           = NULL,
                         is_pbo2        = NULL
                         ) {
-  # M1 <- length(unique(df[ ,IDs]))
-  # P1 <- length(unique(df[ ,IDp]))
-  # # get placebo studies
-  # is_pbo1  <- df[ ,is_pbo]
-  # tmp     <- data.frame(df[ ,IDs], is_pbo1)
-  # tmp     <- unique(tmp)
-  # is_pbo1 <- tmp[order(tmp[ ,1]),2]
-  
   s1_ind <- df[ ,score]
   df1    <- df[!is.na(s1_ind), ]
   
@@ -105,12 +97,7 @@ df_to_list <- function (df,
     time             = times1,
     score            = S1
   )
-  
-  
-  
-  
-  
-  
+
   if (!is.null(score2)) {
     s2_ind <- df[ ,score2]
     df2    <- df[!is.na(s2_ind), ]
@@ -123,7 +110,6 @@ df_to_list <- function (df,
       stop("NULL values in the data frame for score 2.")
     }
     
-    # browser()
     N2      <- nrow(df2)
     P2      <- length(unique(df2[ ,IDp]))
     M2      <- length(unique(df2[ ,IDs]))

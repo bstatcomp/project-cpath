@@ -4,8 +4,10 @@ my_path <- strsplit(my_path, split = "/")[[1]]
 my_path <- paste0(my_path[-c(length(my_path) - 1, length(my_path))], collapse = "/")
 setwd(my_path)
 library(loo)
+library(tidyr)
 source("./data/generalized_logistic_model/init.R")
 source("./R/sample_from_exe.R")
+source("./R/df_to_list.R")
 
 # data input -------------------------------------------------------------------
 in_data <- readRDS("./data/generalized_logistic_model/data_df.rds")
