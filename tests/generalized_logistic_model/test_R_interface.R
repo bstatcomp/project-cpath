@@ -46,3 +46,21 @@ b <- sample_from_exe(data_list   = in_data,
                      init_list   = in_init, 
                      num_samples = 10,
                      num_warmup  = 10)
+
+# bad data ---------------------------------------------------------------------
+source("./data/generalized_logistic_model/data_bad.R")
+in_data <- nlist(N,
+                 P,
+                 M,
+                 IDp,
+                 IDs,
+                 AGE,
+                 SEX,
+                 COMED,
+                 APOE4,
+                 time,
+                 S)
+b <- sample_from_exe(data_list   = in_data, 
+                     init_list   = in_init, 
+                     num_samples = 10,
+                     num_warmup  = 10)
