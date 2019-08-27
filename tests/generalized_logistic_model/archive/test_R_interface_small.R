@@ -6,6 +6,7 @@ my_path <- paste0(my_path[-c(length(my_path) - 1, length(my_path))],
 setwd(my_path)
 library(loo)
 library(rstan)
+library(mcmcse)
 source("./R/sample_from_exe_new.R")
 source("./R/df_to_list_new.R")
 
@@ -211,4 +212,7 @@ if (file.exists(file_name)) {
 RStan_summ <- apply(do.call(cbind, ext), 2, median)
 exe_summ   <- apply(exe_samps$stan_model, 2, median)
 data.frame(RStan_summ[-length(RStan_summ)], exe_summ[-c(1:7)])
+
+
+compare_samples(do.call(cbind, ext)[ ,-length(RStan_summ)], exe_samps$stan_model[ ,-c(1:7)])
 

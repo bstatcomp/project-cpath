@@ -50,18 +50,18 @@ df_to_list <- function (df,
     return (new_inds)
   }
   # patients
-  IDp1    <- df1[ ,IDp]
-  original <- IDp1
-  IDp1    <- reindex(IDp1)
+  IDp1      <- df1[ ,IDp]
+  original  <- IDp1
+  IDp1      <- reindex(IDp1)
   reindexed <- IDp1
-  IDp1_map <- unique(data.frame(original, reindexed))
+  IDp1_map  <- unique(data.frame(original, reindexed))
   
   # studies
-  IDs1    <- df1[ ,IDs]
-  original <- IDs1
-  IDs1    <- reindex(IDs1)
+  IDs1      <- df1[ ,IDs]
+  original  <- IDs1
+  IDs1      <- reindex(IDs1)
   reindexed <- IDs1
-  IDs1_map <- unique(data.frame(original, reindexed))
+  IDs1_map  <- unique(data.frame(original, reindexed))
 
   map_list <- list(
     "patient1" = IDp1_map,
@@ -116,18 +116,18 @@ df_to_list <- function (df,
     
     # reindex
     # patients
-    IDp2    <- df2[ ,IDp]
-    original <- IDp2
-    IDp2    <- reindex(IDp2)
+    IDp2      <- df2[ ,IDp]
+    original  <- IDp2
+    IDp2      <- reindex(IDp2)
     reindexed <- IDp2
-    IDp2_map <- unique(data.frame(original, reindexed))
+    IDp2_map  <- unique(data.frame(original, reindexed))
     
     # studies
-    IDs2    <- df2[ ,IDs]
-    original <- IDs2
-    IDs2    <- reindex(IDs2)
+    IDs2      <- df2[ ,IDs]
+    original  <- IDs2
+    IDs2      <- reindex(IDs2)
     reindexed <- IDs2
-    IDs2_map <- unique(data.frame(original, reindexed))
+    IDs2_map  <- unique(data.frame(original, reindexed))
     
     map_list <- list(
       "patient1" = IDp1_map,

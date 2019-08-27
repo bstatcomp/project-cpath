@@ -1,4 +1,4 @@
-# WD, libraries, and sourcing --------------------------------------------------
+## WD, libraries, and sourcing -------------------------------------------------
 my_path <- dirname(rstudioapi::getSourceEditorContext()$path)
 my_path <- strsplit(my_path, split = "/")[[1]]
 my_path <- paste0(my_path[-c(length(my_path) - 1, length(my_path))], 
@@ -6,258 +6,178 @@ my_path <- paste0(my_path[-c(length(my_path) - 1, length(my_path))],
 setwd(my_path)
 library(loo)
 library(rstan)
+library(mcmcse)
 source("./R/sample_from_exe_new.R")
 source("./R/df_to_list_new.R")
 
-# data input -------------------------------------------------------------------
+
+## functions -------------------------------------------------------------------
+reindex <- function  (x) {
+  new_inds <- x
+  for (i in 1:length(x)) {
+    new_inds[i] <- which(x[i] == unique(x))
+  }
+  return (new_inds)
+}
+
+
+## data input ------------------------------------------------------------------
+set.seed(1)
+niter   <- 2
 in_data <- read.csv("./data/generalized_logistic_model/data_for_stan_model_cov_smallset2.csv")
 is_pbo  <- rep(0, nrow(in_data))
 is_pbo[in_data$IDs %in% c(13,14,15,16)]  <- 1
 in_data <- cbind(in_data, "placebo" = is_pbo)
-set.seed(1)
-niter   <- 5000
-
-# Compile model ----------------------------------------------------------------
-model_name  <- "new_model"
-compiled_fn <- paste0("./tests/generalized_logistic_model/compiled/", model_name, "_compiled.rds")
-
-if (!file.exists(compiled_fn)) {
-  model_fit <- stan_model(file = paste0("./tests/generalized_logistic_model/Stan/", model_name, ".stan"))
-  saveRDS(model_fit, file = compiled_fn)
-} else {
-  model_fit <- readRDS(compiled_fn)
-}
-
-# test 1 -----------------------------------------------------------------------
-M <- length(unique(in_data$IDs))
-stan_data <- list(
-  N                = nrow(in_data),
-  P                = length(unique(in_data$IDp)),
-  M                = length(unique(in_data$IDs)),
-  Q_r              = 2,
-  Q_s              = 1,
-  multiplicative_r = 0,
-  multiplicative_s = 0,
-  X_r              = in_data[ ,colnames(in_data) %in% c("AGE", "SEX")],
-  X_s              = as.matrix(in_data[ ,colnames(in_data) %in% c("COMED")]),
-  is_pbo           = c(rep(0, M - 4), rep(1, 4)),
-  IDp              = in_data$IDp,
-  IDs              = in_data$IDs,
-  time             = in_data$TIME,
-  score            = in_data$ADAS
-)
-file_name <- paste0("./tests/generalized_logistic_model/saved_samples/test1_Rstan_niter",
-                    niter,
-                    ".rds")
-if (file.exists(file_name)) {
-  RStan_samps <- readRDS(file_name)
-} else {
-  set.seed(1)
-  RStan_samps <- sampling(model_fit, stan_data, chains = 1, iter = niter, seed = 1)
-  saveRDS(RStan_samps, file = file_name)
-}
-ext <- rstan::extract(RStan_samps)
-
-# exe
-file_name <- paste0("./tests/generalized_logistic_model/saved_samples/test1_exe_niter",
-                    niter,
-                    ".rds")
-if (file.exists(file_name)) {
-  exe_samps <- readRDS(file_name)
-} else {
-  set.seed(1)
-  exe_samps <- sample_from_exe_new(df             = in_data,
-                                   SubjectIdVar   = IDp,
-                                   StudyIdVar     = IDs,
-                                   TimeVar        = TIME,
-                                   ScoreVar       = ADAS,
-                                   is_pbo         = placebo,
-                                   CovariatesR    = ~ AGE + SEX,
-                                   CovariatesB    = ~ COMED,
-                                   num_samples    = niter / 2,
-                                   num_warmup     = niter / 2,
-                                   seed           = 1)
-  saveRDS(exe_samps, file = file_name)
-}
-
-RStan_summ <- apply(do.call(cbind, ext), 2, median)
-exe_summ   <- apply(exe_samps$stan_model, 2, median)
-data.frame(RStan_summ[-length(RStan_summ)], exe_summ[-c(1:7)])
 
 
-# test 2 -----------------------------------------------------------------------
-M <- length(unique(in_data$IDs))
-stan_data <- list(
-  N                = nrow(in_data),
-  P                = length(unique(in_data$IDp)),
-  M                = length(unique(in_data$IDs)),
-  Q_r              = 2,
-  Q_s              = 1,
-  multiplicative_r = 1,
-  multiplicative_s = 1,
-  X_r              = in_data[ ,colnames(in_data) %in% c("AGE", "SEX")],
-  X_s              = as.matrix(in_data[ ,colnames(in_data) %in% c("COMED")]),
-  is_pbo           = c(rep(0, M - 4), rep(1, 4)),
-  IDp              = in_data$IDp,
-  IDs              = in_data$IDs,
-  time             = in_data$TIME,
-  score            = in_data$ADAS
-)
-file_name <- paste0("./tests/generalized_logistic_model/saved_samples/test2_Rstan_niter",
-                    niter,
-                    ".rds")
-if (file.exists(file_name)) {
-  RStan_samps <- readRDS(file_name)
-} else {
-  set.seed(1)
-  RStan_samps <- sampling(model_fit, stan_data, chains = 1, iter = niter, seed = 1)
-  saveRDS(RStan_samps, file = file_name)
-}
-ext <- rstan::extract(RStan_samps)
-
-# exe
-file_name <- paste0("./tests/generalized_logistic_model/saved_samples/test2_exe_niter",
-                    niter,
-                    ".rds")
-if (file.exists(file_name)) {
-  exe_samps <- readRDS(file_name)
-} else {
-  set.seed(1)
-  exe_samps <- sample_from_exe_new(df             = in_data,
-                                   SubjectIdVar   = IDp,
-                                   StudyIdVar     = IDs,
-                                   TimeVar        = TIME,
-                                   ScoreVar       = ADAS,
-                                   is_pbo         = placebo,
-                                   CovariatesR    = ~ AGE + SEX,
-                                   CovariatesB    = ~ COMED,
-                                   m_r            = 1,
-                                   m_b            = 1,
-                                   num_samples    = niter / 2,
-                                   num_warmup     = niter / 2,
-                                   seed           = 1)
-  saveRDS(exe_samps, file = file_name)
-}
-
-RStan_summ <- apply(do.call(cbind, ext), 2, median)
-exe_summ   <- apply(exe_samps$stan_model, 2, median)
-data.frame(RStan_summ[-length(RStan_summ)], exe_summ[-c(1:7)])
-
-# test 3 -----------------------------------------------------------------------
-M <- length(unique(in_data$IDs))
-stan_data <- list(
-  N                = nrow(in_data),
-  P                = length(unique(in_data$IDp)),
-  M                = length(unique(in_data$IDs)),
-  Q_r              = 2,
-  Q_s              = 1,
-  multiplicative_r = 0,
-  multiplicative_s = 0,
-  X_r              = matrix(data = 0, nrow = nrow(in_data), ncol = 0),
-  X_s              = matrix(data = 0, nrow = nrow(in_data), ncol = 0),
-  is_pbo           = c(rep(0, M - 4), rep(1, 4)),
-  IDp              = in_data$IDp,
-  IDs              = in_data$IDs,
-  time             = in_data$TIME,
-  score            = in_data$ADAS
-)
-file_name <- paste0("./tests/generalized_logistic_model/saved_samples/test3_Rstan_niter",
-                    niter,
-                    ".rds")
-if (file.exists(file_name)) {
-  RStan_samps <- readRDS(file_name)
-} else {
-  set.seed(1)
-  RStan_samps <- sampling(model_fit, stan_data, chains = 1, iter = niter, seed = 1)
-  saveRDS(RStan_samps, file = file_name)
-}
-ext <- rstan::extract(RStan_samps)
-
-# exe
-file_name <- paste0("./tests/generalized_logistic_model/saved_samples/test3_exe_niter",
-                    niter,
-                    ".rds")
-if (file.exists(file_name)) {
-  exe_samps <- readRDS(file_name)
-} else {
-  set.seed(1)
-  exe_samps <- sample_from_exe_new(df             = in_data,
-                                   SubjectIdVar   = IDp,
-                                   StudyIdVar     = IDs,
-                                   TimeVar        = TIME,
-                                   ScoreVar       = ADAS,
-                                   is_pbo         = placebo,
-                                   num_samples    = niter / 2,
-                                   num_warmup     = niter / 2,
-                                   seed           = 1)
-  saveRDS(exe_samps, file = file_name)
-}
-
-RStan_summ <- apply(do.call(cbind, ext), 2, median)
-exe_summ   <- apply(exe_samps$stan_model, 2, median)
-data.frame(RStan_summ[-length(RStan_summ)], exe_summ[-c(1:7)])
+## 1 ---------------------------------------------------------------------------
+## normal
+exe_samps <- sample_from_exe_new(df             = in_data,
+                                 SubjectIdVar   = IDp,
+                                 StudyIdVar     = IDs,
+                                 TimeVar        = TIME,
+                                 ScoreVar       = ADAS,
+                                 is_pbo         = placebo,
+                                 CovariatesR    = ~ AGE + SEX,
+                                 CovariatesB    = ~ COMED,
+                                 num_samples    = niter / 2,
+                                 num_warmup     = niter / 2,
+                                 seed           = 1)
+exe_samps$data_used$N
+exe_samps$data_used$Q_r
+head(exe_samps$data_used$X_r)
+head(in_data[ ,c("AGE", "SEX")])
+exe_samps$data_used$is_pbo
 
 
-# test 4 -----------------------------------------------------------------------
-in_data[in_data$IDs != 2, ]$SEX <- NA
-in_data[sample(1:nrow(in_data)), ]$ADAS <- NA
+## 2 ---------------------------------------------------------------------------
+## Placebos at different studies
+tmp_data <- in_data
+is_pbo   <- rep(0, nrow(tmp_data))
+is_pbo[tmp_data$IDs %in% c(2,5,15,16)]  <- 1
+tmp_data$placebo <- is_pbo
 
-tmp_data <- in_data[!is.na(in_data$SEX), ]
-tmp_data <- tmp_data[!is.na(tmp_data$ADAS), ]
-
-M <- length(unique(tmp_data$IDs))
-stan_data <- list(
-  N                = nrow(tmp_data),
-  P                = length(unique(tmp_data$IDp)),
-  M                = length(unique(tmp_data$IDs)),
-  Q_r              = 2,
-  Q_s              = 1,
-  multiplicative_r = 0,
-  multiplicative_s = 0,
-  X_r              = tmp_data[ ,colnames(tmp_data) %in% c("AGE", "SEX")],
-  X_s              = as.matrix(tmp_data[ ,colnames(tmp_data) %in% c("COMED")]),
-  is_pbo           = c(rep(0, M - 4), rep(1, 4)),
-  IDp              = tmp_data$IDp,
-  IDs              = tmp_data$IDs,
-  time             = tmp_data$TIME,
-  score            = tmp_data$ADAS
-)
-file_name <- paste0("./tests/generalized_logistic_model/saved_samples/test4_Rstan_niter",
-                    niter,
-                    ".rds")
-if (file.exists(file_name)) {
-  RStan_samps <- readRDS(file_name)
-} else {
-  set.seed(1)
-  RStan_samps <- sampling(model_fit, stan_data, chains = 1, iter = niter, seed = 1)
-  saveRDS(RStan_samps, file = file_name)
-}
-ext <- rstan::extract(RStan_samps)
-
-# exe
-file_name <- paste0("./tests/generalized_logistic_model/saved_samples/test4_exe_niter",
-                    niter,
-                    ".rds")
-if (file.exists(file_name)) {
-  exe_samps <- readRDS(file_name)
-} else {
-  set.seed(1)
-  exe_samps <- sample_from_exe_new(df             = in_data,
-                                   SubjectIdVar   = IDp,
-                                   StudyIdVar     = IDs,
-                                   TimeVar        = TIME,
-                                   ScoreVar       = ADAS,
-                                   is_pbo         = placebo,
-                                   CovariatesR    = ~ AGE + SEX,
-                                   CovariatesB    = ~ COMED,
-                                   num_samples    = niter / 2,
-                                   num_warmup     = niter / 2,
-                                   seed           = 1)
-  saveRDS(exe_samps, file = file_name)
-}
-
-RStan_summ <- apply(do.call(cbind, ext), 2, median)
-exe_summ   <- apply(exe_samps$stan_model, 2, median)
-data.frame(RStan_summ[-length(RStan_summ)], exe_summ[-c(1:7)])
+exe_samps <- sample_from_exe_new(df             = tmp_data,
+                                 SubjectIdVar   = IDp,
+                                 StudyIdVar     = IDs,
+                                 TimeVar        = TIME,
+                                 ScoreVar       = ADAS,
+                                 is_pbo         = placebo,
+                                 CovariatesR    = ~ AGE + SEX,
+                                 CovariatesB    = ~ COMED,
+                                 num_samples    = niter / 2,
+                                 num_warmup     = niter / 2,
+                                 seed           = 1)
+exe_samps$data_used$is_pbo
 
 
+## 3 ---------------------------------------------------------------------------
+## No covariates
+exe_samps <- sample_from_exe_new(df             = in_data,
+                                 SubjectIdVar   = IDp,
+                                 StudyIdVar     = IDs,
+                                 TimeVar        = TIME,
+                                 ScoreVar       = ADAS,
+                                 is_pbo         = placebo,
+                                 num_samples    = niter / 2,
+                                 num_warmup     = niter / 2,
+                                 seed           = 1)
+exe_samps$data_used$Q_r
+head(exe_samps$data_used$Q_r)
+
+
+## 4 ---------------------------------------------------------------------------
+## Non-empty intersection between core attributes and covariates
+exe_samps <- sample_from_exe_new(df             = in_data,
+                                 SubjectIdVar   = IDp,
+                                 StudyIdVar     = IDs,
+                                 TimeVar        = TIME,
+                                 ScoreVar       = ADAS,
+                                 CovariatesR    = ~ AGE + ADAS,
+                                 is_pbo         = placebo,
+                                 num_samples    = niter / 2,
+                                 num_warmup     = niter / 2,
+                                 seed           = 1)
+
+## 5 ---------------------------------------------------------------------------
+## Non-existing column.
+exe_samps <- sample_from_exe_new(df             = in_data,
+                                 SubjectIdVar   = IDp,
+                                 StudyIdVar     = sID,
+                                 TimeVar        = TIME,
+                                 ScoreVar       = ADAS,
+                                 CovariatesR    = ~ AGE + ADAS,
+                                 is_pbo         = placebo,
+                                 num_samples    = niter / 2,
+                                 num_warmup     = niter / 2,
+                                 seed           = 1)
+
+## 5 ---------------------------------------------------------------------------
+## Non-existing covariate.
+exe_samps <- sample_from_exe_new(df             = in_data,
+                                 SubjectIdVar   = IDp,
+                                 StudyIdVar     = IDs,
+                                 TimeVar        = TIME,
+                                 ScoreVar       = ADAS,
+                                 CovariatesR    = ~ AGE + MMM,
+                                 is_pbo         = placebo,
+                                 num_samples    = niter / 2,
+                                 num_warmup     = niter / 2,
+                                 seed           = 1)
+
+## 6 ---------------------------------------------------------------------------
+## Two full scores
+tmp_data    <- in_data
+tmp_data$S2 <- tmp_data$ADAS
+exe_samps <- sample_from_exe_new(df             = tmp_data,
+                                 SubjectIdVar   = IDp,
+                                 StudyIdVar     = IDs,
+                                 TimeVar        = TIME,
+                                 ScoreVar       = ADAS,
+                                 is_pbo         = placebo,
+                                 CovariatesR    = ~ AGE + SEX,
+                                 CovariatesB    = ~ COMED,
+                                 ScoreVar2      = S2,
+                                 is_pbo2        = placebo,
+                                 CovariatesR2   = ~ AGE,
+                                 CovariatesB2   = ~ COMED + SEX,
+                                 num_samples    = niter / 2,
+                                 num_warmup     = niter / 2,
+                                 seed           = 1)
+exe_samps$data_used$N
+exe_samps$data_used$N2
+exe_samps$data_used$Q_r
+exe_samps$data_used$Q_r2
+head(exe_samps$data_used$X_r)
+head(exe_samps$data_used$X_r2)
+
+
+## 7 ---------------------------------------------------------------------------
+## Two scores with NAs in each
+tmp_data    <- in_data
+tmp_data$S2 <- tmp_data$ADAS
+tmp_data[tmp_data$IDs %in% c(2,3,4,5), ]$ADAS <- NA
+tmp_data[tmp_data$IDs == 15, ]$S2  <- NA
+exe_samps <- sample_from_exe_new(df             = tmp_data,
+                                 SubjectIdVar   = IDp,
+                                 StudyIdVar     = IDs,
+                                 TimeVar        = TIME,
+                                 ScoreVar       = ADAS,
+                                 is_pbo         = placebo,
+                                 CovariatesR    = ~ AGE + SEX,
+                                 CovariatesB    = ~ COMED,
+                                 ScoreVar2      = S2,
+                                 is_pbo2        = placebo,
+                                 CovariatesR2   = ~ AGE,
+                                 CovariatesB2   = ~ COMED + SEX,
+                                 num_samples    = niter / 2,
+                                 num_warmup     = niter / 2,
+                                 seed           = 1)
+exe_samps$data_used$P
+exe_samps$data_used$P2
+exe_samps$data_used$M
+exe_samps$data_used$M2
+head(in_data[!(in_data$IDs %in% c(2,3,4,5)),c("AGE", "SEX")])
+head(exe_samps$data_used$X_r)
+any(!(in_data[!(in_data$IDs %in% c(2,3,4,5)),c("AGE", "SEX")] == exe_samps$data_used$X_r))
+any(!(in_data[!(in_data$IDs %in% c(15)),c("COMED", "SEX")] == exe_samps$data_used$X_s2))

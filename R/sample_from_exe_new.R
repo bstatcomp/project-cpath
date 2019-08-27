@@ -1,4 +1,55 @@
+#' Run a cmdstan model
+#'
+#' Runs a cmdstan model. All parameters with the number 2 in the name are
+#' only used in case of 2 scores.
+#'
+#' @param df Input data frame.
+#' @param mod_name character. The name of the model as saved in 
+#' "./bin/generalized_logistic_model/Win64/" or 
+#' "./bin/generalized_logistic_model/Linux/", without the extension.
+#' @param SubjectIdVar Name of the column which holds the subject IDs.
+#' Must be without quotation marks.
+#' @param StudyIdVar Name of the column which holds the study IDs.
+#' Must be without quotation marks.
+#' @param TimeVar Name of the column which holds the times.
+#' Must be without quotation marks.
+#' @param ScoreVar Name of the column which holds the scores (responses).
+#' Must be without quotation marks.
+#' @param is_pbo binary vector. 1 for placebo studies, 0 for others.
+#' @param CovariatesR formula. Formula of the form ~ A + B + ..., where
+#' the letters represent the names of columns of the covariates for rate.
+#' @param CovariatesB formula. Formula of the form ~ A + B + ..., where
+#' the letters represent the names of columns of the covariates for baseline.
+#' @param m_r binary. 0 if the covariates for rate are additive, 1 if they
+#' are multiplicative.
+#' @param m_b binary. 0 if the covariates for baseline are additive, 1 if they
+#' are multiplicative.
+#' @param ScoreVar2 Name of the column which holds the second scores 
+#' (responses) if applicable.
+#' Must be without quotation marks.
+#' @param is_pbo2 binary vector. 1 for placebo studies, 0 for others.
+#' @param CovariatesR2 formula. Formula of the form ~ A + B + ..., where
+#' the letters represent the names of columns of the covariates for rate.
+#' @param CovariatesB2 formula. Formula of the form ~ A + B + ..., where
+#' the letters represent the names of columns of the covariates for baseline.
+#' @param m_r2 binary. 0 if the covariates for rate are additive, 1 if they
+#' are multiplicative.
+#' @param m_b2 binary. 0 if the covariates for baseline are additive, 1 if they
+#' are multiplicative.
+#' @param gpu_enabled binary.
+#' @param init_list list. The list of initialization parameters for the model.
+#' @param num_samples integer. The number of samples.
+#' @param num_warmup integer. The number of samples in the warmup phase of the
+#' sampling.
+#' @param seed integer. Random seed for the model.
+#' @param ... Other parameters for the sampler.
+#'
+#' @return A list with 3 elements. First is an object of stanfit. Second is the
+#' data used in the modeling. Third are the maps from original subject and
+#' study IDs to the IDs used in the model.
+#'
 sample_from_exe_new <- function (df,
+                                 mod_name        = "new_model",
                                  SubjectIdVar    = IDp,
                                  StudyIdVar      = IDs,
                                  TimeVar         = time,
@@ -9,7 +60,7 @@ sample_from_exe_new <- function (df,
                                  m_r             = 0,
                                  m_b             = 0,
                                  ScoreVar2       = NULL,
-                                 is_pbo2         = placebo,
+                                 is_pbo2         = NULL,
                                  CovariatesR2    = NULL,
                                  CovariatesB2    = NULL,
                                  m_r2            = 0,
@@ -67,6 +118,13 @@ sample_from_exe_new <- function (df,
   # covariates
   covr_nms    <- all.vars(CovariatesR)
   covb_nms    <- all.vars(CovariatesB)
+  
+  if (any(!(covr_nms %in% cnames))) {
+    stop("No column with CovariatesR in the data frame.")
+  }
+  if (any(!(covb_nms %in% cnames))) {
+    stop("No column with CovariatesB in the data frame.")
+  }
   other_names <- c(IDp, IDs, times, score, is_pbo)
 
   score2 <- deparse(substitute(ScoreVar2))
@@ -76,14 +134,23 @@ sample_from_exe_new <- function (df,
       stop(paste0("No column with name ", score2, " in the data frame."))
     }
     is_pbo2      <- deparse(substitute(is_pbo2))
+    if (!(is_pbo2 %in% cnames)) {
+      stop(paste0("No column with name ", is_pbo2, " in the data frame."))
+    }
     other_names  <- c(other_names, score2, is_pbo2)
     covr2_nms    <- all.vars(CovariatesR2)
     covb2_nms    <- all.vars(CovariatesB2)
+    if (any(!(covr2_nms %in% cnames))) {
+      stop("No column with CovariatesR2 in the data frame.")
+    }
+    if (any(!(covb2_nms %in% cnames))) {
+      stop("No column with CovariatesB2 in the data frame.")
+    }
     if (length(intersect(covr2_nms, other_names)) > 0) {
-      stop("Non-empty intersection between rate covariates and core attributes.")
+      stop("Non-empty intersection between rate2 covariates and core attributes.")
     }
     if (length(intersect(covb2_nms, other_names)) > 0) {
-      stop("Non-empty intersection between baseline covariates and core attributes.")
+      stop("Non-empty intersection between baseline2 covariates and core attributes.")
     }
   }
   if (length(intersect(covr_nms, other_names)) > 0) {
@@ -110,28 +177,6 @@ sample_from_exe_new <- function (df,
                      paste(c(sample(c("a","b","c","d", 1:9), 4, TRUE)), 
                            collapse = ""),
                      ".csv")
-  
-  
-  # create a character vector for each variable in the list
-  my_fun <- function (vec) {
-    if (!is.null(dim(vec))) {
-      n_row    <- dim(vec)[1]
-      n_col    <- dim(vec)[2]
-      if (n_col == 0) {
-        char_vec <- paste0(" <- matrix(data = 0, nrow = ", n_row, ", ncol = 0)")
-      } else {
-        char_vec <- paste0(" <- matrix(c(", paste0(vec, collapse = " , "), "), nrow = ", n_row, ")")
-      }
-    } else {
-      if (length(vec) == 1) {
-        char_vec <- paste0(" <- ", vec)
-      } else {
-        char_vec <- paste0(" <- c(", paste0(vec, collapse = " , "), ")")
-      }
-    }
-    
-    return (char_vec)
-  }
 
   
   if(score2 == "NULL") {
@@ -191,18 +236,16 @@ sample_from_exe_new <- function (df,
   }
   my_os <- get_os()
   if (my_os == "win") {
-    mod <- "./bin/generalized_logistic_model/Win64/new_model.exe"
-    
-    # CHANGE WINDOWS MODEL HERE
-
+    mod <- paste0("./bin/generalized_logistic_model/Win64/",
+                  mod_name,
+                  ".exe")
     write(gpu_enabled, file = "./bin/generalized_logistic_model/Win64/gpu_enabled.txt")
   }
   if (my_os == "unix") {
-    
-    # CHANGE LINUX MODEL HERE
-    
+    mod <- paste0("./bin/generalized_logistic_model/Win64/",
+                  mod_name,
+                  ".exe")
     write(gpu_enabled, file = "./bin/generalized_logistic_model/Linux/gpu_enabled.txt")
-    # TODO Linux executable
   }
   if (my_os == "mac") {
     stop("macOS not supported.")
@@ -256,13 +299,11 @@ sample_from_exe_new <- function (df,
     file.remove(data_file, init_file, out_file)
     stop(e)
   })
-
+  
 
   # read saved csv and return the values + delete temporary files
   tryCatch({
-    stan_out <- read.delim(out_file,
-                           sep          = ",",
-                           comment.char = "#")
+    stan_out <- read_stan_csv(out_file)
   }, warning = function(w){
     print(w)
   }, error   = function(e) {
@@ -271,5 +312,6 @@ sample_from_exe_new <- function (df,
   })
 
   return(list("stan_model" = stan_out, 
+              "data_used"  = data_list,
               "maps"       = maps))
 }
