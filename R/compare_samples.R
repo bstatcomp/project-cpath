@@ -16,11 +16,13 @@ compare_samples <- function (samp1, samp2, statistic = "mean") {
   mcmcse2 <- apply(samp2, 2, get_mcmcse)
   is_within <- abs(mu1 - mu2) <= 2 * mcmcse1
   diff_perc <- abs(mu1 - mu2) / abs(mu1)
+  diff_at   <- abs(mu1 - mu2) < 0.01
   out <- data.frame("expected1" = mu1,
                     "expected2" = mu2,
                     "mcmcse1"   = mcmcse1,
                     "mcmcse2"   = mcmcse2,
                     "is_same"   = is_within,
-                    "difference" = abs(mu1 - mu2))
+                    "difference" = abs(mu1 - mu2),
+                    "diff_at_third" = diff_at)
   return(out)
 }

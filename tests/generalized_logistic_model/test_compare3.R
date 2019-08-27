@@ -17,7 +17,7 @@ source("./R/compare_samples.R")
 
 ## data input ------------------------------------------------------------------
 set.seed(1)
-niter   <- 80
+niter   <- 2000
 in_data <- read.csv("./data/generalized_logistic_model/data_for_stan_model_cov_smallset2.csv")
 is_pbo  <- rep(0, nrow(in_data))
 is_pbo[in_data$IDs %in% c(13,14,15,16)]  <- 1
@@ -110,6 +110,7 @@ cs <- compare_samples(do.call(cbind, ext_rstan),
                       do.call(cbind, ext_exe))
 # View(cs)
 summary(cs$is_same)
+summary(cs$diff_at_third)
 
 
 ## ESS -------------------------------------------------------------------------

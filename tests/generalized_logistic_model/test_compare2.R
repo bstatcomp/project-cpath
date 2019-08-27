@@ -112,7 +112,7 @@ cs <- compare_samples(do.call(cbind, ext_rstan),
                       do.call(cbind, ext_exe))
 # View(cs)
 summary(cs$is_same)
-
+summary(cs$diff_at_third)
 
 ## ESS -------------------------------------------------------------------------
 ess_df <- data.frame(apply(do.call(cbind, ext_rstan), 2, ess),

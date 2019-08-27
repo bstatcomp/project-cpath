@@ -17,7 +17,7 @@ source("./R/compare_samples.R")
 
 ## data input ------------------------------------------------------------------
 set.seed(1)
-niter   <- 20
+niter   <- 2000
 in_data <- read.csv("./data/generalized_logistic_model/data_for_stan_model_cov_smallset2.csv")
 is_pbo  <- rep(0, nrow(in_data))
 is_pbo[in_data$IDs %in% c(13,14,15,16)]  <- 1
@@ -26,13 +26,13 @@ in_data <- cbind(in_data, "placebo" = is_pbo)
 
 ## cmdstan1 --------------------------------------------------------------------
 file_name <- paste0("./tests/generalized_logistic_model/saved_samples/",
-                    "test2exes",
+                    "test2exes_first",
                     testn,
                     "_Rstan_niter",
                     niter,
                     ".rds")
 if (file.exists(file_name)) {
-  exe_samps <- readRDS(file_name)
+  exe_samps1 <- readRDS(file_name)
 } else {
   set.seed(1)
   exe_samps1 <- sample_from_exe_new(df             = in_data,
@@ -54,13 +54,13 @@ ext_exe1 <- rstan::extract(exe_samps1$stan_model)
 
 ## cmdstan2 --------------------------------------------------------------------
 file_name <- paste0("./tests/generalized_logistic_model/saved_samples/",
-                    "test2exes",
+                    "test2exes_second",
                     testn,
                     "_Rstan_niter",
                     niter,
                     ".rds")
 if (file.exists(file_name)) {
-  exe_samps <- readRDS(file_name)
+  exe_samps2 <- readRDS(file_name)
 } else {
   set.seed(1)
   exe_samps2 <- sample_from_exe_new(df            = in_data,
@@ -85,6 +85,7 @@ cs <- compare_samples(do.call(cbind, ext_exe1),
                       do.call(cbind, ext_exe2))
 # View(cs)
 summary(cs$is_same)
+summary(cs$diff_at_third)
 
 
 ## ESS -------------------------------------------------------------------------

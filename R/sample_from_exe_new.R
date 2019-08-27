@@ -244,7 +244,7 @@ sample_from_exe_new <- function (df,
   if (my_os == "unix") {
     mod <- paste0("./bin/generalized_logistic_model/Win64/",
                   mod_name,
-                  ".exe")
+                  "")
     write(gpu_enabled, file = "./bin/generalized_logistic_model/Linux/gpu_enabled.txt")
   }
   if (my_os == "mac") {
