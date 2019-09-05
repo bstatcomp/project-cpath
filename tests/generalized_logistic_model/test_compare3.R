@@ -2,12 +2,21 @@
 ## TEST 3 -- no covariates
 testn <- 3
 
-## WD, libraries, and sourcing --------------------------------------------------
+## WD --------------------------------------------------------------------------
+
+## !!!
+## If not using RStudio, change the working directory by hand to the root
+## of the project folder, that contains the "tests" folder. 
+## Use setwd("path_to_folder").
+## If using RStudio, the below code will automatically set the path, relative
+## to the path of this script.
 my_path <- dirname(rstudioapi::getSourceEditorContext()$path)
 my_path <- strsplit(my_path, split = "/")[[1]]
 my_path <- paste0(my_path[-c(length(my_path) - 1, length(my_path))], 
                   collapse = "/")
 setwd(my_path)
+
+# libraries and sourcing -------------------------------------------------------
 library(loo)
 library(rstan)
 library(mcmcse)
