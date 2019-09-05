@@ -163,17 +163,17 @@ sample_from_exe_new <- function (df,
   
   # create temporary file names for data and init
   data_file <- paste0(tempdir(),
-                      "\\data",
+                      "/data",
                       paste(c(sample(c("a","b","c","d", 1:9), 4, TRUE)), 
                             collapse = ""),
                       ".R")
   init_file <- paste0(tempdir(),
-                      "\\init",
+                      "/init",
                       paste(c(sample(c("a","b","c","d", 1:9), 4, TRUE)), 
                             collapse = ""),
                       ".R")
   out_file  = paste0(tempdir(),
-                     "\\out",
+                     "/out",
                      paste(c(sample(c("a","b","c","d", 1:9), 4, TRUE)), 
                            collapse = ""),
                      ".csv")
@@ -242,7 +242,7 @@ sample_from_exe_new <- function (df,
     write(gpu_enabled, file = "./bin/generalized_logistic_model/Win64/gpu_enabled.txt")
   }
   if (my_os == "unix") {
-    mod <- paste0("./bin/generalized_logistic_model/Win64/",
+    mod <- paste0("./bin/generalized_logistic_model/Linux/",
                   mod_name,
                   "")
     write(gpu_enabled, file = "./bin/generalized_logistic_model/Linux/gpu_enabled.txt")
