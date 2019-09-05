@@ -15,6 +15,9 @@ source("./R/sample_from_exe_new.R")
 source("./R/df_to_list_new.R")
 source("./R/compare_samples.R")
 
+dir.create("./tests/generalized_logistic_model/saved_samples")
+dir.create("./tests/generalized_logistic_model/compiled")
+
 # functions --------------------------------------------------------------------
 reindex <- function  (x) {
   new_inds <- x

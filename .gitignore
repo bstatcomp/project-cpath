@@ -2,3 +2,4 @@
 /stan-models/generalized_logistic_model/*.hpp
 /stan-models/generalized_logistic_model/*.csv
 tests/generalized_logistic_model/saved_samples/
+tests/generalized_logistic_model/compiled/
