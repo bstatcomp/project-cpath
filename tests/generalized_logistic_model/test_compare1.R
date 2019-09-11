@@ -7,7 +7,7 @@ my_path <- dirname(rstudioapi::getSourceEditorContext()$path)
 my_path <- strsplit(my_path, split = "/")[[1]]
 my_path <- paste0(my_path[-c(length(my_path) - 1, length(my_path))], 
                   collapse = "/")
-setwd(my_path)compil 
+setwd(my_path) 
 library(loo)
 library(rstan)
 library(mcmcse)
