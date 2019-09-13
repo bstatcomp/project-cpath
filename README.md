@@ -1,8 +1,8 @@
 # project-cpath
 
-### R package for Bayesian modelling using stan with GPU support
-
-This is a R package that uses Stan (cmdstan) for the back-end estimation. It is tailored specifically to be used on [C-Path](https://c-path.org/) disease data. The modifications to stan include explicit derivation of the model derivative implemented in C++ and OpenCL to achieve maximum performance. 
+### R package for Temporal progression modelling using stan with GPU support
+The package is a R wrapper for a temporal progression model based on a generalized logistic curve with patient and study random effects on progression baseline and progression rate. The model also supports an arbitrary number of covariates linked with baseline and rate with a linear term and an additional 2-parameter Bateman-type (equlibriation and elimination rate) placebo term.
+The package uses Stan (cmdstan) for the back-end estimation. It is tailored specifically to be used on [C-Path](https://c-path.org/) disease data. The modifications to stan include explicit derivation of the model derivative implemented in C++ and OpenCL to achieve maximum performance. 
 
 ### Installation
 
