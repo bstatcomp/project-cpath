@@ -49,7 +49,7 @@
 #' study IDs to the IDs used in the model.
 #'
 sampling_gpu        <- function (df,
-                                 mod_name        = "new_model",
+                                 mod_name        = "generalized_logistic_model",
                                  SubjectIdVar    = IDp,
                                  StudyIdVar      = IDs,
                                  TimeVar         = time,

@@ -77,7 +77,7 @@ exe_samps        <- sampling_gpu(df             = in_data,
                                  gpu_enabled    = 1,
                                  m_r            = 1,
                                  m_b            = 1,
-                                 mod_name       = "new_model")
+                                 mod_name       = "generalized_logistic_model")
 exe_samps$maps
 stan_mod <- exe_samps$stan_model
 stan_mod
