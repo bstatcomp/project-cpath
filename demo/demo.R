@@ -7,9 +7,9 @@ setwd(my_path)
 library(loo)
 library(rstan)
 library(mcmcse)
-source("./R/sampling_gpu.R")
-source("./R/df_to_list.R")
-
+# source("./R/sampling_gpu.R")
+# source("./R/df_to_list.R")
+library(GLMCPath)
 
 ## data input ------------------------------------------------------------------
 niter   <- 20

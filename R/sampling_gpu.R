@@ -358,7 +358,7 @@ sampling_gpu        <- function (df,
 
   
   if(score2 == "NULL") {
-    data_list <- GLMCPath::df_to_list(df, 
+    data_list <- df_to_list(df, 
                             IDp            = IDp,
                             IDs            = IDs,
                             times          = times,
@@ -369,7 +369,7 @@ sampling_gpu        <- function (df,
                             m_b            = m_b,
                             is_pbo         = is_pbo)
   } else {
-    data_list <- GLMCPath::df_to_list(df, 
+    data_list <- df_to_list(df, 
                             IDp            = IDp,
                             IDs            = IDs,
                             times          = times,
