@@ -250,7 +250,7 @@ sampling_gpu        <- function (df,
     stop("macOS not supported.")
     # + link to page?
   }
-  paste(mod)
+  print(paste(mod))
   
   
   
