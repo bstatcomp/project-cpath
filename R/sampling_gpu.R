@@ -103,7 +103,9 @@ sampling_gpu        <- function (df,
     mod <- paste0("./bin/generalized_logistic_model/Win64/",
                   mod_name,
                   ".exe")
-                  
+    browser()
+    print(mod)
+    flush(stdout())              
   }
   if (my_os == "unix") {
     mod <- system.file("bin",paste0(mod_name),"Linux",paste0(mod_name), package = "GLMCPath")
