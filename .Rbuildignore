@@ -1,0 +1,10 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+README.md
+cmdstan/*
+bin/*
+demo/*
+\.github/*
+LICENSE$
+models/*
+bin/*
