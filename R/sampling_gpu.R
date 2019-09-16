@@ -246,8 +246,8 @@ sampling_gpu        <- function (df,
     stop("macOS not supported.")
     # + link to page?
   }
-  message(mod,"\r",appendLF=FALSE)
-    flush.console()
+  message("SelectdedPath:"paste0(mod))
+  flush.console()
   
   
   # create string
