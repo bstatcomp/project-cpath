@@ -251,7 +251,7 @@ sampling_gpu        <- function (df,
     # + link to page?
   }
   print(paste(mod))
-  
+  flush.console()
   
   
   # create string
