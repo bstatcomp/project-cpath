@@ -239,6 +239,7 @@ sampling_gpu        <- function (df,
     mod <- paste0("./bin/generalized_logistic_model/Win64/",
                   mod_name,
                   ".exe")
+                  
   }
   if (my_os == "unix") {
     mod <- paste0("./bin/generalized_logistic_model/Linux/",
@@ -249,7 +250,7 @@ sampling_gpu        <- function (df,
     stop("macOS not supported.")
     # + link to page?
   }
-
+  paste(mod)
   
   
   
