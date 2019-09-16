@@ -236,11 +236,11 @@ sampling_gpu        <- function (df,
   }
   my_os <- get_os()
   if (my_os == "win") {
-    mod <- system.file(paste0(mod_name,".exe"), package = "GLMCPath")
+    mod <- system.file("bin",paste0(mod_name),"Win64",paste0(mod_name,".exe"), package = "GLMCPath")
                   
   }
   if (my_os == "unix") {
-    mod <- system.file(paste0(mod_name,""), package = "GLMCPath")
+    mod <- system.file("bin",paste0(mod_name),"Linux",paste0(mod_name), package = "GLMCPath")
   }
   if (my_os == "mac") {
     stop("macOS not supported.")
