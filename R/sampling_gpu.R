@@ -96,6 +96,21 @@ sampling_gpu        <- function (df,
   times      <- deparse(substitute(TimeVar))
   score      <- deparse(substitute(ScoreVar))
   is_pbo     <- deparse(substitute(is_pbo))
+  
+  my_os <- get_os()
+  if (my_os == "win") {
+    mod <- system.file("bin",paste0(mod_name),"Win64",paste0(mod_name,".exe"), package = "GLMCPath")
+                  
+  }
+  if (my_os == "unix") {
+    mod <- system.file("bin",paste0(mod_name),"Linux",paste0(mod_name), package = "GLMCPath")
+  }
+  if (my_os == "mac") {
+    stop("macOS not supported.")
+    # + link to page?
+  }
+  message("SelectdedPath:",paste0(mod))
+  flush(stdout())
 
   # check if in data frame
   cnames <- colnames(df)
@@ -246,8 +261,8 @@ sampling_gpu        <- function (df,
     stop("macOS not supported.")
     # + link to page?
   }
-  warning("SelectdedPath:",paste0(mod))
-  flush.console()
+  message("SelectdedPath:",paste0(mod))
+  flush(stdout())
   
   
   # create string
