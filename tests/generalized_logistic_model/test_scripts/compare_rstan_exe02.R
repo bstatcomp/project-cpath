@@ -22,7 +22,7 @@ library(rstan)
 library(mcmcse)
 source("./R/sampling_gpu.R")
 source("./R/df_to_list.R")
-source("./R/compare_samples.R")
+source("./tests/generalized_logistic_model/test_scripts/R/compare_samples.R")
 
 dir.create("./tests/generalized_logistic_model/saved_samples")
 dir.create("./tests/generalized_logistic_model/compiled")
