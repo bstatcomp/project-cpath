@@ -236,15 +236,11 @@ sampling_gpu        <- function (df,
   }
   my_os <- get_os()
   if (my_os == "win") {
-    mod <- system.file(paste0("./bin/generalized_logistic_model/Win64/",
-                  mod_name,
-                  ".exe"))
+    mod <- system.file(paste0(mod_name,".exe"))
                   
   }
   if (my_os == "unix") {
-    mod <- system.file(paste0("./bin/generalized_logistic_model/Linux/",
-                  mod_name,
-                  ""))
+    mod <- system.file(paste0(mod_name,""))
   }
   if (my_os == "mac") {
     stop("macOS not supported.")
