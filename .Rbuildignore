@@ -2,9 +2,8 @@
 ^\.Rproj\.user$
 README.md
 cmdstan/*
-bin/*
+./bin/*
 demo/*
 \.github/*
 LICENSE$
 models/*
-bin/*
