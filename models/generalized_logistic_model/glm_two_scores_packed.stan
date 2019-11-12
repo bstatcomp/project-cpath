@@ -181,6 +181,14 @@ parameters{
   corr_matrix[2] Omega_sr;
 }
 
+transformed parameters {
+  real k_eq1;
+  real k_eq2;
+  k_eq1 = k_el1 + delta1;
+  k_eq2 = k_el2 + delta2;
+}
+
+
 model{
   real tgt = 0;
   
@@ -273,12 +281,12 @@ model{
 
   // Likelihood for first score
 	tgt += generalized_logistic_model(IDp, IDs, is_pbo, time, score1, multiplicative_s, multiplicative_r, X_s, X_r,   // data
-                  tau1, beta1, beta_pbo1, k_el1, k_el1 + delta1, theta_r1, theta_s1,
+                  tau1, beta1, beta_pbo1, k_el1, k_eq1, theta_r1, theta_s1,
                   eta_pr1, eta_sr1, eta_ps1, eta_ss1, base_s1, base_r1);
       
   // Likelihood for second score            
   tgt += generalized_logistic_model(IDp2, IDs2, is_pbo2, time2, score2, multiplicative_s2, multiplicative_r2, X_s2, X_r2,   // data
-                  tau2, beta2, beta_pbo2, k_el2, k_el2 + delta2, theta_r2, theta_s2,
+                  tau2, beta2, beta_pbo2, k_el2, k_eq2, theta_r2, theta_s2,
                   eta_pr2, eta_sr2, eta_ps2, eta_ss2, base_s2, base_r2);
 
   target += tgt;

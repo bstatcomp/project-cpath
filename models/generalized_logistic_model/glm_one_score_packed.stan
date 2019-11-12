@@ -122,6 +122,11 @@ parameters{
   real<lower=0> delta1;
 }
 
+transformed parameters {
+  real k_eq1;
+  k_eq1 = k_el1 + delta1;
+}
+
 model{
   real tgt = 0;
   
@@ -153,7 +158,7 @@ model{
 
   // Likelihood for first score
 	tgt += generalized_logistic_model(IDp, IDs, is_pbo, time, score1, multiplicative_s, multiplicative_r, X_s, X_r,   // data
-                  tau1, beta1, beta_pbo1, k_el1, k_el1 + delta1, theta_r1, theta_s1,
+                  tau1, beta1, beta_pbo1, k_el1, k_eq1, theta_r1, theta_s1,
                   eta_pr1, eta_sr1, eta_ps1, eta_ss1, base_s1, base_r1);
 
   target += tgt;
