@@ -104,7 +104,8 @@ sampling_gpu        <- function (df,
                           covb2_nms      = NULL,
                           m_r2           = NULL,
                           m_b2           = NULL,
-                          is_pbo2        = NULL
+                          is_pbo2        = NULL,
+                          mod_name
   ) {
     s1_ind <- df[ ,score]
     df1    <- df[!is.na(s1_ind), ]
@@ -161,23 +162,43 @@ sampling_gpu        <- function (df,
     tmp     <- unique(tmp)
     is_pbo1 <- tmp[order(tmp[ ,1]),2]
     
+    # CORRECT THIS!!!
+    if (mod_name == "glm_one_score_packed") {
+      out_list <- list(
+        N                = N1,
+        P                = P1,
+        M                = M1,
+        Q_r              = ncol(covsr1),
+        Q_s              = ncol(covsb1),
+        multiplicative_s = m_b,
+        multiplicative_r = m_r,
+        X_r              = covsr1,
+        X_s              = covsb1,
+        is_pbo           = is_pbo1,
+        IDp              = IDp1,
+        IDs              = IDs1,
+        time             = times1,
+        score1           = S1
+      )
+    } else {
+      out_list <- list(
+        N                = N1,
+        P                = P1,
+        M                = M1,
+        Q_r              = ncol(covsr1),
+        Q_s              = ncol(covsb1),
+        multiplicative_s = m_b,
+        multiplicative_r = m_r,
+        X_r              = covsr1,
+        X_s              = covsb1,
+        is_pbo           = is_pbo1,
+        IDp              = IDp1,
+        IDs              = IDs1,
+        time             = times1,
+        score            = S1
+      )
+    }
     
-    out_list <- list(
-      N                = N1,
-      P                = P1,
-      M                = M1,
-      Q_r              = ncol(covsr1),
-      Q_s              = ncol(covsb1),
-      multiplicative_s = m_b,
-      multiplicative_r = m_r,
-      X_r              = covsr1,
-      X_s              = covsb1,
-      is_pbo           = is_pbo1,
-      IDp              = IDp1,
-      IDs              = IDs1,
-      time             = times1,
-      score            = S1
-    )
     
     if (!is.null(score2)) {
       s2_ind <- df[ ,score2]
@@ -367,7 +388,8 @@ sampling_gpu        <- function (df,
                             covb_nms       = covb_nms,
                             m_r            = m_r,
                             m_b            = m_b,
-                            is_pbo         = is_pbo)
+                            is_pbo         = is_pbo,
+                            mod_name)
   } else {
     data_list <- df_to_list(df, 
                             IDp            = IDp,
@@ -384,7 +406,8 @@ sampling_gpu        <- function (df,
                             covb2_nms      = covb2_nms,
                             m_r2           = m_r2,
                             m_b2           = m_b2,
-                            is_pbo2        = is_pbo2)
+                            is_pbo2        = is_pbo2,
+                            mod_name)
   }
   maps      <- data_list$maps
   data_list <- data_list$data
