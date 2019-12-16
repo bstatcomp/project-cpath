@@ -1,4 +1,50 @@
 functions {
+  real my_func(int[] IDp, 
+               int[] IDs, 
+               int[] is_pbo, 
+               vector time, 
+               vector score, 
+               int multiplicative_s, 
+               int multiplicative_r, 
+               matrix X_s, 
+               matrix X_r,   // data
+               real tau, 
+               real beta, 
+               real beta_pbo, 
+               real k_el, 
+               real k_eq, 
+               vector theta_r, 
+               vector theta_s, 
+               vector eta_pr, 
+               vector eta_sr, 
+               vector eta_ps, 
+               vector eta_ss, 
+               real base_s, 
+               real base_r) {
+    // setup
+    int N = size(IDp);
+    vector[N] muS;
+    real tgt = 0;
+    for (i in 1:N) {
+
+      real cov_s = base_s + eta_ps[IDp[i]] + eta_ss[IDs[i]];
+      real cov_r = base_r + eta_pr[IDp[i]] + eta_sr[IDs[i]];
+      real S0;
+      real r;
+      real pbo_eff;
+      if (rows(theta_s) != 0) cov_s += X_s[i] * theta_s;
+      if (rows(theta_r) != 0) cov_r += X_r[i] * theta_r;
+      if (multiplicative_s == 1) cov_s = exp(cov_s);
+      if (multiplicative_r == 1) cov_r = exp(cov_r);
+      S0 = inv_logit(cov_s);
+      r = cov_r;
+
+      pbo_eff = beta_pbo * (k_eq / (k_eq - k_el))  * (exp(-k_el * time[i]) - exp(-k_eq * time[i]));
+      muS[i] = S0 / (S0^beta + (1 - S0^beta) * exp(-beta * r * time[i]))^(1 / beta) - is_pbo[IDs[i]] * pbo_eff;
+    }
+    return  beta_lpdf(score | muS * tau, (1 - muS) * tau);
+  }
+  
   real get_mu(int IDp, 
               int IDs, 
               int is_pbo, 
@@ -36,46 +82,6 @@ functions {
       pbo_eff = beta_pbo * (k_eq / (k_eq - k_el))  * (exp(-k_el * time) - exp(-k_eq * time));
       mu = S0 / (S0^beta + (1 - S0^beta) * exp(-beta * r * time))^(1 / beta) - is_pbo * pbo_eff;
     return mu;
-  }
-  
-  
-  real get_tau(int IDp, 
-               int IDs, 
-               int is_pbo, 
-               real time, 
-               int multiplicative_s, 
-               int multiplicative_r, 
-               vector X_s, 
-               vector X_r,   // data
-               real tau, 
-               real beta, 
-               real beta_pbo, 
-               real k_el, 
-               real k_eq, 
-               vector theta_r, 
-               vector theta_s, 
-               real eta_pr, 
-               real eta_sr, 
-               real eta_ps, 
-               real eta_ss, 
-               real base_s, 
-               real base_r) {            
-      real mu;     
-      real cov_s = base_s + eta_ps + eta_ss;
-      real cov_r = base_r + eta_pr + eta_sr;
-      real S0;
-      real r;
-      real pbo_eff;
-      if (rows(theta_s) != 0) cov_s += X_s' * theta_s;
-      if (rows(theta_r) != 0) cov_r += X_r' * theta_r;
-      if (multiplicative_s == 1) cov_s = exp(cov_s);
-      if (multiplicative_r == 1) cov_r = exp(cov_r);
-      S0 = inv_logit(cov_s);
-      r = cov_r;
-
-      pbo_eff = beta_pbo * (k_eq / (k_eq - k_el))  * (exp(-k_el * time) - exp(-k_eq * time));
-      mu = S0 / (S0^beta + (1 - S0^beta) * exp(-beta * r * time))^(1 / beta) - is_pbo * pbo_eff;
-    return tau;
   }
 }
 
@@ -169,7 +175,6 @@ generated quantities{
   vector[N] score1_pred;
   for (n in 1:N) {
     real mu_pred;
-    real tau_pred;
     mu_pred = get_mu(IDp[n], 
                      IDs[n], 
                      is_pbo[IDs[n]], 
@@ -182,7 +187,7 @@ generated quantities{
                      beta1, 
                      beta_pbo1, 
                      k_el1, 
-                     k_el1 + delta1, 
+                     k_eq1, 
                      theta_r1, 
                      theta_s1,
                      eta_pr1[IDp[n]], 
@@ -191,28 +196,7 @@ generated quantities{
                      eta_ss1[IDs[n]], 
                      base_s1, 
                      base_r1);
-    tau_pred = get_tau(IDp[n], 
-                     IDs[n], 
-                     is_pbo[IDs[n]], 
-                     time[n], 
-                     multiplicative_s, 
-                     multiplicative_r, 
-                     X_s[n, ]', 
-                     X_r[n, ]',   // data
-                     tau1, 
-                     beta1, 
-                     beta_pbo1, 
-                     k_el1, 
-                     k_el1 + delta1, 
-                     theta_r1, 
-                     theta_s1,
-                     eta_pr1[IDp[n]], 
-                     eta_sr1[IDs[n]], 
-                     eta_ps1[IDp[n]], 
-                     eta_ss1[IDs[n]], 
-                     base_s1, 
-                     base_r1);
-    score1_pred[n] = beta_rng(mu_pred * tau_pred, (1 - mu_pred) * tau_pred);
+    score1_pred[n] = beta_rng(mu_pred * tau1, (1 - mu_pred) * tau1);
   }
 }
 
