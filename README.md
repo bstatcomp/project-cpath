@@ -15,4 +15,4 @@ devtools::install_github("bstatcomp/project-cpath")
 
 If you have a GPU available in your system and the drivers properly installed, the package will automatically detect the GPU and try to use to maximum effect.
 
-The package currently supports Window and Ubuntu OS.
+The package currently supports Windows and Ubuntu OS.
