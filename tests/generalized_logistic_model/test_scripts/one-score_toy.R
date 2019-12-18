@@ -17,8 +17,7 @@ setwd(my_path)
 # libraries and sourcing -------------------------------------------------------
 library(loo)
 library(rstan)
-library(mcmcse)
-source("./R/sampling_gpu.R")
+library(GLMCPath)
 
 
 ## functions -------------------------------------------------------------------
@@ -80,22 +79,14 @@ toy_data$placebo2 = 0
 ## 1 ---------------------------------------------------------------------------
 ## normal
 niter <- 1000
-exe_samps        <- sampling_gpu(df             = toy_data,
+exe_samps        <- GLMCPath::sampling_gpu(df   = toy_data,
                                  SubjectIdVar   = IDp,
                                  StudyIdVar     = IDs,
                                  TimeVar        = time,
                                  ScoreVar       = S1,
                                  is_pbo         = placebo1,
-                                 # CovariatesR    = ~ AGE + COMED,
-                                 # CovariatesB    = ~ AGE + COMED,
                                  CovariatesR    = ~ COMED + AGE,
                                  CovariatesB    = ~ COMED + AGE,
-                                 # ScoreVar2      = S2,
-                                 # is_pbo2        = placebo2,
-                                 # CovariatesR2   = ~ AGE + COMED,
-                                 # CovariatesB2   = ~ AGE + COMED,
-                                 # CovariatesR2   = ~ COMED + AGE,
-                                 # CovariatesB2   = ~ COMED + AGE,
                                  num_samples    = niter / 2,
                                  num_warmup     = niter / 2,
                                  seed           = 1)

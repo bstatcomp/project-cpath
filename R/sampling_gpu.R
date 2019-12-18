@@ -50,7 +50,7 @@
 #' each iteration.
 #'
 sampling_gpu        <- function (df,
-                                 mod_name        = "glm_one_score_packed",
+                                 mod_name        = "generalized_logistic_model",
                                  SubjectIdVar    = IDp,
                                  StudyIdVar      = IDs,
                                  TimeVar         = time,
