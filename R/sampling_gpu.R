@@ -448,16 +448,16 @@ sampling_gpu        <- function (df,
   my_os <- get_os()
   if (my_os == "win") {
     if (score2 != "NULL") {
-      mod <- system.file("bin",paste0(mod_name),"Win64",paste0("glm_two_scores",".exe"), package = "GLMCPath")
+      mod <- system.file("bin",paste0(mod_name),"Win64",paste0("glm_two_scores_packed",".exe"), package = "GLMCPath")
     } else {
-      mod <- system.file("bin",paste0(mod_name),"Win64",paste0("glm_one_score",".exe"), package = "GLMCPath")
+      mod <- system.file("bin",paste0(mod_name),"Win64",paste0("glm_one_score_packed",".exe"), package = "GLMCPath")
     }
   }
   if (my_os == "unix") {
     if (score2 != "NULL") {
-      mod <- system.file("bin",paste0(mod_name),"Linux",paste0("glm_two_scores"), package = "GLMCPath")
+      mod <- system.file("bin",paste0(mod_name),"Linux",paste0("glm_two_scores_packed"), package = "GLMCPath")
     } else {
-      mod <- system.file("bin",paste0(mod_name),"Linux",paste0("glm_one_score"), package = "GLMCPath")
+      mod <- system.file("bin",paste0(mod_name),"Linux",paste0("glm_one_score_packed"), package = "GLMCPath")
     }
   }
   if (my_os == "mac") {
