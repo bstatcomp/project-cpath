@@ -2,22 +2,20 @@
 
 ## !!!
 ## If not using RStudio, change the working directory by hand to the root
-## of the project folder, that contains the "tests" folder. 
+## of the project folder, that contains the "tests" folder.
 ## Use setwd("path_to_folder").
 ## If using RStudio, the below code will automatically set the path, relative
 ## to the path of this script.
 my_path <- dirname(rstudioapi::getSourceEditorContext()$path)
 my_path <- strsplit(my_path, split = "/")[[1]]
-my_path <- paste0(my_path[-c((length(my_path) - 2):(length(my_path)))], 
+my_path <- paste0(my_path[-c((length(my_path) - 2):(length(my_path)))],
                   collapse = "/")
 setwd(my_path)
 
 # libraries and sourcing -------------------------------------------------------
 library(loo)
 library(rstan)
-library(mcmcse)
-source("./R/sampling_gpu.R")
-source("./R/df_to_list.R")
+
 
 
 ## functions -------------------------------------------------------------------
@@ -32,16 +30,17 @@ reindex <- function  (x) {
 
 ## data input ------------------------------------------------------------------
 set.seed(1)
-niter   <- 2
+niter   <- 100
 in_data <- read.csv("./data/generalized_logistic_model/data_for_stan_model_cov_smallset2.csv")
 is_pbo  <- rep(0, nrow(in_data))
-is_pbo[in_data$IDs %in% c(13,14,15,16)]  <- 1
+# is_pbo[in_data$IDs %in% c(13,14,15,16)]  <- 1
+is_pbo[in_data$IDs %in% c(15)]  <- 1
 in_data <- cbind(in_data, "placebo" = is_pbo)
 
 
 ## 1 ---------------------------------------------------------------------------
 ## normal
-exe_samps        <- sampling_gpu(df             = in_data,
+exe_samps        <- sampling_gpu2(df             = in_data,
                                  SubjectIdVar   = IDp,
                                  StudyIdVar     = IDs,
                                  TimeVar        = TIME,

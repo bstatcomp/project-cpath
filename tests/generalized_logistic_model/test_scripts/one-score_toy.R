@@ -17,6 +17,7 @@ setwd(my_path)
 # libraries and sourcing -------------------------------------------------------
 library(loo)
 library(rstan)
+library(dplyr)
 library(GLMCPath)
 
 
@@ -76,8 +77,8 @@ toy_data$placebo1 = 0
 toy_data$placebo2 = 0
 
 
-## 1 ---------------------------------------------------------------------------
-## normal
+
+# sampling ---------------------------------------------------------------------
 niter <- 1000
 exe_samps        <- GLMCPath::sampling_gpu(df   = toy_data,
                                  SubjectIdVar   = IDp,
