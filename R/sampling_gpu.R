@@ -457,14 +457,14 @@ sampling_gpu        <- function (df,
       if (gpu_enabled == 0) {
         mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_two_scores_packed_CPU.exe"), package = "GLMCPath")
       } else {
-        mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_two_scores_delta_packed_GPU.exe"), package = "GLMCPath")
+        mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_two_scores_packed_GPU.exe"), package = "GLMCPath")
       }
       
     } else {
       if (gpu_enabled == 0) {
         mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_one_score_packed_CPU.exe"), package = "GLMCPath")
       } else {
-        mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_one_score_delta_packed_GPU.exe"), package = "GLMCPath")
+        mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_one_score_packed_GPU.exe"), package = "GLMCPath")
       }
       
     }
