@@ -4,9 +4,8 @@
 #' only used in case of 2 scores.
 #'
 #' @param df Input data frame.
-#' @param mod_name character. The name of the model as saved in
-#' "./bin/generalized_logistic_model/Win64/" or
-#' "./bin/generalized_logistic_model/Linux/", without the extension.
+#' @param mod_name character. The name of the model. For now the only possible
+#' value is "glm".
 #' @param SubjectIdVar Name of the column which holds the subject IDs.
 #' Must be without quotation marks.
 #' @param StudyIdVar Name of the column which holds the study IDs.
@@ -15,7 +14,8 @@
 #' Must be without quotation marks.
 #' @param ScoreVar Name of the column which holds the scores (responses).
 #' Must be without quotation marks.
-#' @param is_pbo binary vector. 1 for placebo studies, 0 for others.
+#' @param is_pbo Name of the placebo column for score 1. Must be without 
+#' quotation marks.
 #' @param CovariatesR formula. Formula of the form ~ A + B + ..., where
 #' the letters represent the names of columns of the covariates for rate.
 #' @param CovariatesB formula. Formula of the form ~ A + B + ..., where
@@ -27,7 +27,8 @@
 #' @param ScoreVar2 Name of the column which holds the second scores
 #' (responses) if applicable.
 #' Must be without quotation marks.
-#' @param is_pbo2 binary vector. 1 for placebo studies, 0 for others.
+#' @param is_pbo2 Name of the placebo column for score 2. Must be without 
+#' quotation marks.
 #' @param CovariatesR2 formula. Formula of the form ~ A + B + ..., where
 #' the letters represent the names of columns of the covariates for rate.
 #' @param CovariatesB2 formula. Formula of the form ~ A + B + ..., where
@@ -44,10 +45,11 @@
 #' @param seed integer. Random seed for the model.
 #' @param ... Other parameters for the sampler.
 #'
-#' @return A list with 4 elements. First is an object of stanfit. Second is the
-#' data used in the modeling. Third are the maps from original subject and
-#' study IDs to the IDs used in the model. Fourth are the predicted values for
-#' each iteration.
+#' @return A list with 4 elements. 
+#' \item{stan_model}{An object of stanfit. Fitted model.}
+#' \item{data_used}{The exact data that stan model used.}
+#' \item{maps}{The maps from original subject and study IDs to the IDs used in the model.}
+#' \item{pred_samples}{The predicted values for each iteration.}
 #'
 sampling_gpu_new    <- function (df,
                                  mod_name        = "glm",
@@ -478,7 +480,6 @@ sampling_gpu_new    <- function (df,
         mod <- system.file(paste0("bin/generalized_logistic_model/Linux/", mod_name, "_one_score_delta_packed_GPU"), package = "GLMCPath")
       }
     }
-    # mod <- system.file("bin",paste0(mod_name),"Linux",paste0(mod_name), package = "GLMCPath")
   }
   if (my_os == "mac") {
     stop("macOS not supported.")
