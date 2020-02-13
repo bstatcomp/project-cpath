@@ -430,12 +430,12 @@ sampling_gpu        <- function (df,
   tmp <<- data_list
   #data
   with(data_list, {
-    stan_rdump(names(data_list), file = data_file)
+    rstan::stan_rdump(names(data_list), file = data_file)
   })
   
   # init
   with(init_list, {
-    stan_rdump(names(init_list), file = init_file)
+    rstan::stan_rdump(names(init_list), file = init_file)
   })
   
   # here we have to check for OS and select the correct version into mod

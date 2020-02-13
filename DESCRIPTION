@@ -5,6 +5,7 @@ Version: 0.1.0
 Author: Davor Sluga, Rok Cešnovar, Gregor Pirš, Erik Štrumbelj, Jackson Burton
 Maintainer: The package maintainer <davor.sluga@fri.uni-lj.si>
 Description: The package is a R wrapper for a temporal progression model based on a generalized logistic curve with patient and study random effects on progression baseline and progression rate. The model also supports an arbitrary number of covariates linked with baseline and rate with a linear term and an additional 2-parameter Bateman-type (equlibriation and elimination rate) placebo term. The package uses Stan (cmdstan) for the back-end estimation. It is tailored specifically to be used on C-Path disease data. The modifications to stan include explicit derivation of the model derivative implemented in C++ and OpenCL to achieve maximum performance. 
+Imports: rstan
 License: BSD-3
 Encoding: UTF-8
 LazyData: true
