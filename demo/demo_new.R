@@ -12,7 +12,7 @@ library(GLMCPath)
 
 # source("./support_scripts/sampling_gpu_new.R")
 
-dataset <- readRDS("./data/generalized_logistic_model/real_small_placebo_1.rds")
+dataset <- readRDS("./data/generalized_logistic_model/demo/real_small_placebo_1.rds")
 df      <- dataset$table_data
 niter   <- 40
 
@@ -107,7 +107,7 @@ ggplot(plot_df, aes(x = orig_val, y = pred)) +
 
 
 ## two-score -------------------------------------------------------------------
-dataset <- readRDS("./datasets/repo/toy_small_two_scores_separate_placebo_2_3.rds")
+dataset <- readRDS("./data/generalized_logistic_model/demo/toy_small_two_scores_separate_placebo_2_3.rds")
 df      <- dataset$table_data
 glm_samples <- sampling_gpu_new(df           = df,
                                 SubjectIdVar = IDp,
