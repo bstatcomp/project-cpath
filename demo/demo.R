@@ -16,8 +16,9 @@ dataset <- readRDS("./data/generalized_logistic_model/demo/real_small_placebo_1.
 df      <- dataset$table_data
 niter   <- 40
 
+
 ## normal model ----------------------------------------------------------------
-glm_samples <- sampling_gpu_new(df           = df,
+glm_samples <-     sampling_gpu(df           = df,
                                 SubjectIdVar = IDp,
                                 StudyIdVar   = IDs,
                                 TimeVar      = TIME,
@@ -46,40 +47,8 @@ ggplot(plot_df, aes(x = orig_val, y = pred)) +
   geom_abline(aes(intercept = 0, slope = 1), color = "red")
 
 
-## multiplicative --------------------------------------------------------------
-glm_samples <- sampling_gpu_new(df           = df,
-                                SubjectIdVar = IDp,
-                                StudyIdVar   = IDs,
-                                TimeVar      = TIME,
-                                ScoreVar     = ADAS,
-                                is_pbo       = is_pbo,
-                                CovariatesR  = ~ AGE + SEX,
-                                CovariatesB  = ~ COMED,
-                                num_samples  = niter / 2,
-                                num_warmup   = niter / 2,
-                                m_r          = 1,
-                                m_b          = 0,
-                                seed         = 1,
-                                gpu_enabled  = 1)
-## check fit
-psmp    <- glm_samples$pred_samples
-X       <- psmp[ ,-(1:11)]
-preds   <- apply(X, 1, mean)
-tmp_df  <- cbind(psmp[ ,c("IDp", "IDs", "TIME", "scoreN")], "pred" = preds)
-tmp_df$scoreN[tmp_df$scoreN == 1] <- "ADAS"
-
-dat_eval <- df %>%
-  select(IDp, IDs, ADAS, TIME) %>%
-  gather(key = scoreN, value = orig_val, ADAS)
-
-plot_df <- left_join(dat_eval, tmp_df, by = c("IDp", "IDs", "TIME", "scoreN"))
-ggplot(plot_df, aes(x = orig_val, y = pred)) +
-  geom_point() +
-  geom_abline(aes(intercept = 0, slope = 1), color = "red")
-
-
 ## no covariates ---------------------------------------------------------------
-glm_samples <- sampling_gpu_new(df           = df,
+glm_samples     <- sampling_gpu(df           = df,
                                 SubjectIdVar = IDp,
                                 StudyIdVar   = IDs,
                                 TimeVar      = TIME,
@@ -109,7 +78,7 @@ ggplot(plot_df, aes(x = orig_val, y = pred)) +
 ## two-score -------------------------------------------------------------------
 dataset <- readRDS("./data/generalized_logistic_model/demo/toy_small_two_scores_separate_placebo_2_3.rds")
 df      <- dataset$table_data
-glm_samples <- sampling_gpu_new(df           = df,
+glm_samples     <- sampling_gpu(df           = df,
                                 SubjectIdVar = IDp,
                                 StudyIdVar   = IDs,
                                 TimeVar      = time,

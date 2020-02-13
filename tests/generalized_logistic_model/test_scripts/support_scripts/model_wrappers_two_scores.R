@@ -52,7 +52,7 @@ process_exe_model_two_scores <- function(model_name, dat_list, iter, warmup, see
   
   exe_samps <- NULL
   tryCatch({
-    exe_samps        <- sampling_gpu_new(df         = df,
+    exe_samps        <- sampling_gpu(df             = df,
                                      SubjectIdVar   = IDp,
                                      StudyIdVar     = IDs,
                                      TimeVar        = time,

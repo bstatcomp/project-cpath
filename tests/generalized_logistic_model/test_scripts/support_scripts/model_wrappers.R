@@ -47,7 +47,7 @@ process_exe_model <- function(model_name, dat_list, iter, warmup, seed, GPU = 0)
 
   exe_samps <- NULL
   tryCatch({
-    exe_samps        <- sampling_gpu_new(df         = df,
+    exe_samps            <- sampling_gpu(df             = df,
                                          SubjectIdVar   = IDp,
                                          StudyIdVar     = IDs,
                                          TimeVar        = time,

@@ -51,7 +51,7 @@
 #' \item{maps}{The maps from original subject and study IDs to the IDs used in the model.}
 #' \item{pred_samples}{The predicted values for each iteration.}
 #'
-sampling_gpu_new    <- function (df,
+sampling_gpu        <- function (df,
                                  mod_name        = "glm",
                                  SubjectIdVar    = IDp,
                                  StudyIdVar      = IDs,
@@ -92,6 +92,9 @@ sampling_gpu_new    <- function (df,
                                  id              = 0,
                                  seed            = 1607674300,
                                  ...) {
+  if ((m_r == 1) | (m_r2 == 1) | (m_b == 1) | (m_b2 == 1)) {
+    stop("Multiplicative model currently not supported.")
+  }
   df_to_list <- function (df,
                           IDp            = NULL,
                           IDs            = NULL,
@@ -452,14 +455,14 @@ sampling_gpu_new    <- function (df,
   if (my_os == "win") {
     if (score2 != "NULL") {
       if (gpu_enabled == 0) {
-        mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_two_scores_delta_packed_CPU.exe"), package = "GLMCPath")
+        mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_two_scores_packed_CPU.exe"), package = "GLMCPath")
       } else {
         mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_two_scores_delta_packed_GPU.exe"), package = "GLMCPath")
       }
       
     } else {
       if (gpu_enabled == 0) {
-        mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_one_score_delta_packed_CPU.exe"), package = "GLMCPath")
+        mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_one_score_packed_CPU.exe"), package = "GLMCPath")
       } else {
         mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_one_score_delta_packed_GPU.exe"), package = "GLMCPath")
       }
@@ -469,15 +472,15 @@ sampling_gpu_new    <- function (df,
   if (my_os == "unix") {
     if (score2 != "NULL") {
       if (gpu_enabled == 0) {
-        mod <- system.file(paste0("bin/generalized_logistic_model/Linux/", mod_name, "_two_scores_delta_packed_CPU"), package = "GLMCPath")
+        mod <- system.file(paste0("bin/generalized_logistic_model/Linux/", mod_name, "_two_scores_packed_CPU"), package = "GLMCPath")
       } else {
-        mod <- system.file(paste0("bin/generalized_logistic_model/Linux/", mod_name, "_two_scores_delta_packed_GPU"), package = "GLMCPath")
+        mod <- system.file(paste0("bin/generalized_logistic_model/Linux/", mod_name, "_two_scores_packed_GPU"), package = "GLMCPath")
       }
     } else {
       if (gpu_enabled == 0) {
-        mod <- system.file(paste0("bin/generalized_logistic_model/Linux/", mod_name, "_one_score_delta_packed_CPU"), package = "GLMCPath")
+        mod <- system.file(paste0("bin/generalized_logistic_model/Linux/", mod_name, "_one_score_packed_CPU"), package = "GLMCPath")
       } else {
-        mod <- system.file(paste0("bin/generalized_logistic_model/Linux/", mod_name, "_one_score_delta_packed_GPU"), package = "GLMCPath")
+        mod <- system.file(paste0("bin/generalized_logistic_model/Linux/", mod_name, "_one_score_packed_GPU"), package = "GLMCPath")
       }
     }
   }
