@@ -22,16 +22,16 @@ datasets <- list.files("./data/generalized_logistic_model/tests/two_scores/", pa
 
 
 models   <- list(
-  model1 = list(name = "two_scores", func = "model_glm_two_scores")
-  , model6 = list(name = "glm_two_scores_delta_packed_CPU", func = "glm_two_scores_delta_packed_CPU")
-  , model7 = list(name = "glm_two_scores_delta_packed_GPU", func = "glm_two_scores_delta_packed_GPU")
+  # model1 = list(name = "two_scores", func = "model_glm_two_scores")
+  # , model6 = list(name = "glm_two_scores_delta_packed_CPU", func = "glm_two_scores_delta_packed_CPU")
+  model7 = list(name = "glm_two_scores_delta_packed_GPU", func = "glm_two_scores_delta_packed_GPU")
 )
 
 
 
 seeds    <- c(1, 20, 2535, 4467, 156) # the number of these also determines the number of repetitions
-iter     <- 200
-warmup   <- 200
+iter     <- 100
+warmup   <- 100
 
 design <- expand.grid(modl = 1:length(models), data = 1:length(datasets), seed = 1:length(seeds))
 

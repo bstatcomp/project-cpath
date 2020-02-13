@@ -451,33 +451,34 @@ sampling_gpu_new    <- function (df,
     if (score2 != "NULL") {
       if (gpu_enabled == 0) {
         mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_two_scores_delta_packed_CPU.exe"), package = "GLMCPath")
-        # mod <- paste0("./inst/bin/generalized_logistic_model/Win64/",
-        #               mod_name,
-        #               "_two_scores_delta_packed_CPU.exe")
       } else {
         mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_two_scores_delta_packed_GPU.exe"), package = "GLMCPath")
-        # mod <- paste0("./inst/bin/generalized_logistic_model/Win64/",
-        #               mod_name,
-        #               "_two_scores_delta_packed_GPU.exe")
       }
       
     } else {
       if (gpu_enabled == 0) {
         mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_one_score_delta_packed_CPU.exe"), package = "GLMCPath")
-        # mod <- paste0("./inst/bin/generalized_logistic_model/Win64/",
-        #               mod_name,
-        #               "_one_score_delta_packed_CPU.exe")
       } else {
         mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_one_score_delta_packed_GPU.exe"), package = "GLMCPath")
-        # mod <- paste0("./inst/bin/generalized_logistic_model/Win64/",
-        #               mod_name,
-        #               "_one_score_delta_packed_GPU.exe")
       }
       
     }
   }
   if (my_os == "unix") {
-    mod <- system.file("bin",paste0(mod_name),"Linux",paste0(mod_name), package = "GLMCPath")
+    if (score2 != "NULL") {
+      if (gpu_enabled == 0) {
+        mod <- system.file(paste0("bin/generalized_logistic_model/Linux/", mod_name, "_two_scores_delta_packed_CPU"), package = "GLMCPath")
+      } else {
+        mod <- system.file(paste0("bin/generalized_logistic_model/Linux/", mod_name, "_two_scores_delta_packed_GPU"), package = "GLMCPath")
+      }
+    } else {
+      if (gpu_enabled == 0) {
+        mod <- system.file(paste0("bin/generalized_logistic_model/Linux/", mod_name, "_one_score_delta_packed_CPU"), package = "GLMCPath")
+      } else {
+        mod <- system.file(paste0("bin/generalized_logistic_model/Linux/", mod_name, "_one_score_delta_packed_GPU"), package = "GLMCPath")
+      }
+    }
+    # mod <- system.file("bin",paste0(mod_name),"Linux",paste0(mod_name), package = "GLMCPath")
   }
   if (my_os == "mac") {
     stop("macOS not supported.")

@@ -4,3 +4,4 @@
 tests/generalized_logistic_model/saved_samples/
 tests/generalized_logistic_model/compiled/
 .Rhistory
+tests/generalized_logistic_model/test_scripts/temp/
