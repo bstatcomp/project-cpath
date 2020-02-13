@@ -137,7 +137,7 @@ sampling_gpu_new    <- function (df,
     IDp1      <- reindex(IDp1)
     reindexed <- IDp1
     IDp1_map  <- unique(data.frame(original, reindexed))
-
+    
     # studies
     IDs1      <- df1[ ,IDs]
     original  <- IDs1
@@ -387,7 +387,7 @@ sampling_gpu_new    <- function (df,
                      paste(c(sample(c("a","b","c","d", 1:9), 4, TRUE)),
                            collapse = ""),
                      ".csv")
-
+  
   if(score2 == "NULL") {
     data_list <- df_to_list(df,
                             IDp            = IDp,
@@ -450,24 +450,28 @@ sampling_gpu_new    <- function (df,
   if (my_os == "win") {
     if (score2 != "NULL") {
       if (gpu_enabled == 0) {
-        mod <- paste0("./inst/bin/generalized_logistic_model/Win64/",
-                      mod_name,
-                      "_two_scores_delta_packed_CPU.exe")
+        mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_two_scores_delta_packed_CPU.exe"), package = "GLMCPath")
+        # mod <- paste0("./inst/bin/generalized_logistic_model/Win64/",
+        #               mod_name,
+        #               "_two_scores_delta_packed_CPU.exe")
       } else {
-        mod <- paste0("./inst/bin/generalized_logistic_model/Win64/",
-                      mod_name,
-                      "_two_scores_delta_packed_GPU.exe")
+        mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_two_scores_delta_packed_GPU.exe"), package = "GLMCPath")
+        # mod <- paste0("./inst/bin/generalized_logistic_model/Win64/",
+        #               mod_name,
+        #               "_two_scores_delta_packed_GPU.exe")
       }
       
     } else {
       if (gpu_enabled == 0) {
-        mod <- paste0("./inst/bin/generalized_logistic_model/Win64/",
-                      mod_name,
-                      "_one_score_delta_packed_CPU.exe")
+        mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_one_score_delta_packed_CPU.exe"), package = "GLMCPath")
+        # mod <- paste0("./inst/bin/generalized_logistic_model/Win64/",
+        #               mod_name,
+        #               "_one_score_delta_packed_CPU.exe")
       } else {
-        mod <- paste0("./inst/bin/generalized_logistic_model/Win64/",
-                      mod_name,
-                      "_one_score_delta_packed_GPU.exe")
+        mod <- system.file(paste0("bin/generalized_logistic_model/Win64/", mod_name, "_one_score_delta_packed_GPU.exe"), package = "GLMCPath")
+        # mod <- paste0("./inst/bin/generalized_logistic_model/Win64/",
+        #               mod_name,
+        #               "_one_score_delta_packed_GPU.exe")
       }
       
     }
