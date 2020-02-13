@@ -4,6 +4,7 @@ my_path <- strsplit(my_path, split = "/")[[1]]
 my_path <- paste0(my_path[-c(length(my_path), length(my_path))], 
                   collapse = "/")
 setwd(my_path)
+library(rstan)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
