@@ -4,81 +4,109 @@ my_path <- strsplit(my_path, split = "/")[[1]]
 my_path <- paste0(my_path[-c(length(my_path), length(my_path))], 
                   collapse = "/")
 setwd(my_path)
-library(loo)
 library(rstan)
-library(mcmcse)
-# source("./R/sampling_gpu.R")
-# source("./R/df_to_list.R")
+library(dplyr)
+library(tidyr)
+library(ggplot2)
 library(GLMCPath)
 
-## data input ------------------------------------------------------------------
-niter   <- 20
-in_data <- read.csv("./data/generalized_logistic_model/data_for_stan_model_cov_smallset2.csv")
+# source("./support_scripts/sampling_gpu_new.R")
 
-# add placebo column
-is_pbo  <- rep(0, nrow(in_data))
-is_pbo[in_data$IDs %in% c(13,14,15,16)]  <- 1
-in_data <- cbind(in_data[ ,-1], "placebo" = is_pbo)
-
-head(in_data)
+dataset <- readRDS("./data/generalized_logistic_model/demo/real_small_placebo_1.rds")
+df      <- dataset$table_data
+niter   <- 40
 
 
-## 1 ---------------------------------------------------------------------------
-## normal
-exe_samps        <- sampling_gpu(df             = in_data,
-                                 SubjectIdVar   = IDp,
-                                 StudyIdVar     = IDs,
-                                 TimeVar        = TIME,
-                                 ScoreVar       = ADAS,
-                                 is_pbo         = placebo,
-                                 CovariatesR    = ~ AGE + SEX,
-                                 CovariatesB    = ~ COMED,
-                                 num_samples    = niter / 2,
-                                 num_warmup     = niter / 2,
-                                 seed           = 1,
-                                 gpu_enabled    = 1)
-exe_samps$maps
-stan_mod <- exe_samps$stan_model
-stan_mod
-traceplot(stan_mod)
+## normal model ----------------------------------------------------------------
+glm_samples <-     sampling_gpu(df           = df,
+                                SubjectIdVar = IDp,
+                                StudyIdVar   = IDs,
+                                TimeVar      = TIME,
+                                ScoreVar     = ADAS,
+                                is_pbo       = is_pbo,
+                                CovariatesR  = ~ AGE + SEX,
+                                CovariatesB  = ~ COMED,
+                                num_samples  = niter / 2,
+                                num_warmup   = niter / 2,
+                                seed         = 1,
+                                gpu_enabled  = 1)
+## check fit (need to join df and prediction samples)
+psmp    <- glm_samples$pred_samples # get prediction samples data frame
+X       <- psmp[ ,-(1:11)] # get only prediction samples
+preds   <- apply(X, 1, mean) # get mean of prediction samples
+tmp_df  <- cbind(psmp[ ,c("IDp", "IDs", "TIME", "scoreN")], "pred" = preds)
+tmp_df$scoreN[tmp_df$scoreN == 1] <- "ADAS"
+
+dat_eval <- df %>%
+  select(IDp, IDs, ADAS, TIME) %>%
+  gather(key = scoreN, value = orig_val, ADAS)
+
+plot_df <- left_join(dat_eval, tmp_df, by = c("IDp", "IDs", "TIME", "scoreN"))
+ggplot(plot_df, aes(x = orig_val, y = pred)) +
+  geom_point() +
+  geom_abline(aes(intercept = 0, slope = 1), color = "red")
 
 
-## 2 ---------------------------------------------------------------------------
-## no covariates
-exe_samps        <- sampling_gpu(df             = in_data,
-                                 SubjectIdVar   = IDp,
-                                 StudyIdVar     = IDs,
-                                 TimeVar        = TIME,
-                                 ScoreVar       = ADAS,
-                                 is_pbo         = placebo,
-                                 num_samples    = niter / 2,
-                                 num_warmup     = niter / 2,
-                                 seed           = 1,
-                                 gpu_enabled    = 1)
-exe_samps$maps
-stan_mod <- exe_samps$stan_model
-stan_mod
-traceplot(stan_mod)
+## no covariates ---------------------------------------------------------------
+glm_samples     <- sampling_gpu(df           = df,
+                                SubjectIdVar = IDp,
+                                StudyIdVar   = IDs,
+                                TimeVar      = TIME,
+                                ScoreVar     = ADAS,
+                                is_pbo       = is_pbo,
+                                num_samples  = niter / 2,
+                                num_warmup   = niter / 2,
+                                seed         = 1,
+                                gpu_enabled  = 1)
+## check fit 
+psmp    <- glm_samples$pred_samples
+X       <- psmp[ ,-(1:11)]
+preds   <- apply(X, 1, mean)
+tmp_df  <- cbind(psmp[ ,c("IDp", "IDs", "TIME", "scoreN")], "pred" = preds)
+tmp_df$scoreN[tmp_df$scoreN == 1] <- "ADAS"
+
+dat_eval <- df %>%
+  select(IDp, IDs, ADAS, TIME) %>%
+  gather(key = scoreN, value = orig_val, ADAS)
+
+plot_df <- left_join(dat_eval, tmp_df, by = c("IDp", "IDs", "TIME", "scoreN"))
+ggplot(plot_df, aes(x = orig_val, y = pred)) +
+  geom_point() +
+  geom_abline(aes(intercept = 0, slope = 1), color = "red")
 
 
-## 3 ---------------------------------------------------------------------------
-## multiplicative
-exe_samps        <- sampling_gpu(df             = in_data,
-                                 SubjectIdVar   = IDp,
-                                 StudyIdVar     = IDs,
-                                 TimeVar        = TIME,
-                                 ScoreVar       = ADAS,
-                                 is_pbo         = placebo,
-                                 CovariatesR    = ~ AGE + SEX,
-                                 CovariatesB    = ~ COMED,
-                                 num_samples    = niter / 2,
-                                 num_warmup     = niter / 2,
-                                 seed           = 1,
-                                 gpu_enabled    = 1,
-                                 m_r            = 1,
-                                 m_b            = 1,
-                                 mod_name       = "generalized_logistic_model")
-exe_samps$maps
-stan_mod <- exe_samps$stan_model
-stan_mod
-traceplot(stan_mod)
+## two-score -------------------------------------------------------------------
+dataset <- readRDS("./data/generalized_logistic_model/demo/toy_small_two_scores_separate_placebo_2_3.rds")
+df      <- dataset$table_data
+glm_samples     <- sampling_gpu(df           = df,
+                                SubjectIdVar = IDp,
+                                StudyIdVar   = IDs,
+                                TimeVar      = time,
+                                ScoreVar     = S1,
+                                is_pbo       = is_pbo,
+                                ScoreVar2    = S2,
+                                is_pbo2      = is_pbo,
+                                CovariatesR2 = ~ COMED + AGE,
+                                CovariatesB2 = ~ COMED + AGE,
+                                num_samples  = niter / 2,
+                                num_warmup   = niter / 2,
+                                seed         = 1,
+                                gpu_enabled  = 1)
+## check fit
+psmp    <- glm_samples$pred_samples
+X       <- psmp[ ,-(1:10)]
+preds   <- apply(X, 1, mean)
+tmp_df  <- cbind(psmp[ ,c("IDp", "IDs", "time", "scoreN")], "pred" = preds)
+tmp_df$scoreN[tmp_df$scoreN == 1] <- "S1"
+tmp_df$scoreN[tmp_df$scoreN == 2] <- "S2"
+
+dat_eval <- df %>%
+  select(IDp, IDs, S1, S2, time) %>%
+  gather(key = scoreN, value = orig_val, S1, S2)
+
+plot_df <- left_join(dat_eval, tmp_df, by = c("IDp", "IDs", "time", "scoreN"))
+plot_df <- plot_df[!is.na(plot_df$orig_val), ]
+ggplot(plot_df, aes(x = orig_val, y = pred)) +
+  geom_point() +
+  facet_wrap(~ scoreN) +
+  geom_abline(aes(intercept = 0, slope = 1), color = "red")

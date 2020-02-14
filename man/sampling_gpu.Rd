@@ -4,25 +4,55 @@
 \alias{sampling_gpu}
 \title{Run a cmdstan model}
 \usage{
-sampling_gpu(df, mod_name = "generalized_logistic_model",
-  SubjectIdVar = IDp, StudyIdVar = IDs, TimeVar = time,
-  ScoreVar = score, is_pbo = placebo, CovariatesR = NULL,
-  CovariatesB = NULL, m_r = 0, m_b = 0, ScoreVar2 = NULL,
-  is_pbo2 = NULL, CovariatesR2 = NULL, CovariatesB2 = NULL,
-  m_r2 = 0, m_b2 = 0, gpu_enabled = 1, init_list = NULL,
-  num_samples = 1000, num_warmup = 1000, save_warmup = 0, thin = 1,
-  engaged = 1, gamma = 0.05, delta = 0.8, kappa = 0.75, t0 = 10,
-  init_buffer = 75, term_buffer = 50, window = 25,
-  algorithm = "hmc", engine = "nuts", max_depth = 10,
-  metric = "diag_e", metric_file = "", stepsize = 1,
-  stepsize_jitter = 0, id = 0, seed = 1607674300, ...)
+sampling_gpu(
+  df,
+  mod_name = "glm",
+  SubjectIdVar = IDp,
+  StudyIdVar = IDs,
+  TimeVar = time,
+  ScoreVar = score,
+  is_pbo = placebo,
+  CovariatesR = NULL,
+  CovariatesB = NULL,
+  m_r = 0,
+  m_b = 0,
+  ScoreVar2 = NULL,
+  is_pbo2 = NULL,
+  CovariatesR2 = NULL,
+  CovariatesB2 = NULL,
+  m_r2 = 0,
+  m_b2 = 0,
+  gpu_enabled = 1,
+  init_list = NULL,
+  num_samples = 1000,
+  num_warmup = 1000,
+  save_warmup = 0,
+  thin = 1,
+  engaged = 1,
+  gamma = 0.05,
+  delta = 0.8,
+  kappa = 0.75,
+  t0 = 10,
+  init_buffer = 75,
+  term_buffer = 50,
+  window = 25,
+  algorithm = "hmc",
+  engine = "nuts",
+  max_depth = 10,
+  metric = "diag_e",
+  metric_file = "",
+  stepsize = 1,
+  stepsize_jitter = 0,
+  id = 0,
+  seed = 1607674300,
+  ...
+)
 }
 \arguments{
 \item{df}{Input data frame.}
 
-\item{mod_name}{character. The name of the model as saved in 
-"./bin/generalized_logistic_model/Win64/" or 
-"./bin/generalized_logistic_model/Linux/", without the extension.}
+\item{mod_name}{character. The name of the model. For now the only possible
+value is "glm".}
 
 \item{SubjectIdVar}{Name of the column which holds the subject IDs.
 Must be without quotation marks.}
@@ -36,7 +66,8 @@ Must be without quotation marks.}
 \item{ScoreVar}{Name of the column which holds the scores (responses).
 Must be without quotation marks.}
 
-\item{is_pbo}{binary vector. 1 for placebo studies, 0 for others.}
+\item{is_pbo}{Name of the placebo column for score 1. Must be without 
+quotation marks.}
 
 \item{CovariatesR}{formula. Formula of the form ~ A + B + ..., where
 the letters represent the names of columns of the covariates for rate.}
@@ -50,11 +81,12 @@ are multiplicative.}
 \item{m_b}{binary. 0 if the covariates for baseline are additive, 1 if they
 are multiplicative.}
 
-\item{ScoreVar2}{Name of the column which holds the second scores 
+\item{ScoreVar2}{Name of the column which holds the second scores
 (responses) if applicable.
 Must be without quotation marks.}
 
-\item{is_pbo2}{binary vector. 1 for placebo studies, 0 for others.}
+\item{is_pbo2}{Name of the placebo column for score 2. Must be without 
+quotation marks.}
 
 \item{CovariatesR2}{formula. Formula of the form ~ A + B + ..., where
 the letters represent the names of columns of the covariates for rate.}
@@ -68,7 +100,7 @@ are multiplicative.}
 \item{m_b2}{binary. 0 if the covariates for baseline are additive, 1 if they
 are multiplicative.}
 
-\item{gpu_enabled}{binary.}
+\item{gpu_enabled}{binary. 1 to use the GPU model, 0 to use the CPU model.}
 
 \item{init_list}{list. The list of initialization parameters for the model.}
 
@@ -82,9 +114,11 @@ sampling.}
 \item{...}{Other parameters for the sampler.}
 }
 \value{
-A list with 3 elements. First is an object of stanfit. Second is the
-data used in the modeling. Third are the maps from original subject and
-study IDs to the IDs used in the model.
+A list with 4 elements. 
+\item{stan_model}{An object of stanfit. Fitted model.}
+\item{data_used}{The exact data that stan model used.}
+\item{maps}{The maps from original subject and study IDs to the IDs used in the model.}
+\item{pred_samples}{The predicted values for each iteration.}
 }
 \description{
 Runs a cmdstan model. All parameters with the number 2 in the name are
