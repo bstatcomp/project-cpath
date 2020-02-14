@@ -3,3 +3,4 @@
 /stan-models/generalized_logistic_model/*.csv
 tests/generalized_logistic_model/saved_samples/
 tests/generalized_logistic_model/compiled/
+bin/generalized_logistic_model/Win64/output.csv
