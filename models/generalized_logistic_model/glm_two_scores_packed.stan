@@ -1,4 +1,50 @@
 functions {
+  real my_func(int[] IDp, 
+               int[] IDs, 
+               int[] is_pbo, 
+               vector time, 
+               vector score, 
+               int multiplicative_s, 
+               int multiplicative_r, 
+               matrix X_s, 
+               matrix X_r,   // data
+               real tau, 
+               real beta, 
+               real beta_pbo, 
+               real k_el, 
+               real k_eq, 
+               vector theta_r, 
+               vector theta_s, 
+               vector eta_pr, 
+               vector eta_sr, 
+               vector eta_ps, 
+               vector eta_ss, 
+               real base_s, 
+               real base_r) {
+    // setup
+    int N = size(IDp);
+    vector[N] muS;
+    real tgt = 0;
+    for (i in 1:N) {
+
+      real cov_s = base_s + eta_ps[IDp[i]] + eta_ss[IDs[i]];
+      real cov_r = base_r + eta_pr[IDp[i]] + eta_sr[IDs[i]];
+      real S0;
+      real r;
+      real pbo_eff;
+      if (rows(theta_s) != 0) cov_s += X_s[i] * theta_s;
+      if (rows(theta_r) != 0) cov_r += X_r[i] * theta_r;
+      if (multiplicative_s == 1) cov_s = exp(cov_s);
+      if (multiplicative_r == 1) cov_r = exp(cov_r);
+      S0 = inv_logit(cov_s);
+      r = cov_r;
+
+      pbo_eff = beta_pbo * (k_eq / (k_eq - k_el))  * (exp(-k_el * time[i]) - exp(-k_eq * time[i]));
+      muS[i] = S0 / (S0^beta + (1 - S0^beta) * exp(-beta * r * time[i]))^(1 / beta) - is_pbo[IDs[i]] * pbo_eff;
+    }
+    return  beta_lpdf(score | muS * tau, (1 - muS) * tau);
+  }
+  
   real get_mu(int IDp, 
               int IDs, 
               int is_pbo, 
@@ -238,8 +284,8 @@ model{
   }
   
 
-   // Likelihood for first score
-   tgt += generalized_logistic_model(IDp, IDs, is_pbo, time, score1, multiplicative_s, multiplicative_r, X_s, X_r,   // data
+  // Likelihood for first score
+	tgt += generalized_logistic_model(IDp, IDs, is_pbo, time, score1, multiplicative_s, multiplicative_r, X_s, X_r,   // data
                   tau1, beta1, beta_pbo1, k_el1, k_eq1, theta_r1, theta_s1,
                   eta_pr1, eta_sr1, eta_ps1, eta_ss1, base_s1, base_r1);
       
@@ -269,7 +315,7 @@ generated quantities{
                      beta1, 
                      beta_pbo1, 
                      k_el1, 
-                     k_eq1 , 
+                     k_el1 + delta1, 
                      theta_r1, 
                      theta_s1,
                      eta_pr1[IDp[n]], 
@@ -284,7 +330,7 @@ generated quantities{
     real mu_pred;
     mu_pred = get_mu(IDp2[n], 
                      IDs2[n], 
-                     is_pbo2[IDs[n]], 
+                     is_pbo2[IDs2[n]], 
                      time2[n], 
                        multiplicative_s2, 
                        multiplicative_r2, 
@@ -294,7 +340,7 @@ generated quantities{
                        beta2, 
                        beta_pbo2, 
                        k_el2, 
-                       k_eq2 , 
+                       k_el2 + delta2, 
                        theta_r2, 
                        theta_s2,
                        eta_pr2[IDp2[n]], 
