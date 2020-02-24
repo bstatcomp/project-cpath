@@ -95,6 +95,7 @@ sampling_gpu        <- function (df,
   if ((m_r == 1) | (m_r2 == 1) | (m_b == 1) | (m_b2 == 1)) {
     stop("Multiplicative model currently not supported.")
   }
+  
   df_to_list <- function (df,
                           IDp            = NULL,
                           IDs            = NULL,
@@ -136,6 +137,9 @@ sampling_gpu        <- function (df,
       }
       return (new_inds)
     }
+    # sort by IDs and IDp
+    df1 <- df1[order(df1[ ,IDs], df1[ ,IDp]), ]
+    
     # patients
     IDp1      <- df1[ ,IDp]
     original  <- IDp1
@@ -202,6 +206,9 @@ sampling_gpu        <- function (df,
       N2      <- nrow(df2)
       P2      <- length(unique(df2[ ,IDp]))
       M2      <- length(unique(df2[ ,IDs]))
+      
+      # sort by IDs and IDp
+      df2 <- df2[order(df2[ ,IDs], df2[ ,IDp]), ]
       
       # reindex
       # patients
@@ -311,6 +318,9 @@ sampling_gpu        <- function (df,
   times      <- deparse(substitute(TimeVar))
   score      <- deparse(substitute(ScoreVar))
   is_pbo     <- deparse(substitute(is_pbo))
+  
+  # order df by study and patient
+  df     <- df[order(df[ ,IDs], df[ ,IDp]), ]
   
   
   # check if in data frame
@@ -427,7 +437,7 @@ sampling_gpu        <- function (df,
   }
   maps      <- data_list$maps
   data_list <- data_list$data
-  tmp <<- data_list
+  
   #data
   with(data_list, {
     rstan::stan_rdump(names(data_list), file = data_file)
@@ -543,6 +553,13 @@ sampling_gpu        <- function (df,
     stop(paste(e, "No output from the model. Check model call."))
   })
   
+  # reindex back
+  reindex_back <- function (x, tmap) {
+    for (i in 1:length(x)) {
+      x[i] <- tmap$original[tmap$reindexed == x[i]]
+    }
+    return (x)
+  }
   
   if(score2 == "NULL") {
     ext <- rstan::extract(stan_out)
@@ -567,9 +584,10 @@ sampling_gpu        <- function (df,
     # rbind
     mdf <- mdf1
     
-    mdf_sorted     <- mdf[order(mdf$scoreN, mdf[ , IDp], mdf[ , IDs], mdf[ , times]), ]
-    pred_df_sorted <- pred_df[order(mdf$scoreN, mdf[ , IDp], mdf[ , IDs], mdf[ , times]), ]
-    out_data       <- cbind(mdf_sorted, pred_df_sorted[ ,-(1:4)])
+    
+    pred_df$IDs <- reindex_back(pred_df$IDs, maps$study1)
+    pred_df$IDp <- reindex_back(pred_df$IDp, maps$patient1)
+    out_data    <- dplyr::left_join(mdf, pred_df, by = c("scoreN", IDs, IDp, times))
   } else {
     ext <- rstan::extract(stan_out)
     pred_df1 <- data.frame(IDp = data_list$IDp,
@@ -578,11 +596,18 @@ sampling_gpu        <- function (df,
                            scoreN = 1)
     pred_df1 <- cbind(pred_df1, t(ext$score1_pred))
     
+    pred_df1$IDs <- reindex_back(pred_df1$IDs, maps$study1)
+    pred_df1$IDp <- reindex_back(pred_df1$IDp, maps$patient1)
+    
     pred_df2 <- data.frame(IDp = data_list$IDp2,
                            IDs = data_list$IDs2,
                            time = data_list$time2,
                            scoreN = 2)
     pred_df2 <- cbind(pred_df2, t(ext$score2_pred))
+    
+    pred_df2$IDs <- reindex_back(pred_df2$IDs, maps$study2)
+    pred_df2$IDp <- reindex_back(pred_df2$IDp, maps$patient2)
+    
     pred_df  <- rbind(pred_df1, pred_df2)
     
     mdf1 <- df[ , colnames(df) != score2]
@@ -602,11 +627,12 @@ sampling_gpu        <- function (df,
     
     # rbind
     mdf <- rbind(mdf1, mdf2)
-    
-    mdf_sorted     <- mdf[order(mdf$scoreN, mdf[ , IDp], mdf[ , IDs], mdf[ , times]), ]
-    pred_df_sorted <- pred_df[order(mdf$scoreN, mdf[ , IDp], mdf[ , IDs], mdf[ , times]), ]
-    out_data       <- cbind(mdf_sorted, pred_df_sorted[ ,-(1:4)])
+    out_data    <- dplyr::left_join(mdf, pred_df, by = c("scoreN", IDs, IDp, times))
   }
+  out_data <- out_data[order(out_data[ ,"scoreN"],
+                             out_data[ ,IDs],
+                             out_data[ ,IDp],
+                             out_data[ ,times]), ]
   
   return(list("stan_model"   = stan_out,
               "data_used"    = data_list,
